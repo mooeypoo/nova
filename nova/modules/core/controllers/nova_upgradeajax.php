@@ -111,6 +111,7 @@ abstract class Nova_upgradeajax extends Controller {
 	{
 		$this->load->model('characters_model', 'char');
 		$this->load->model('users_model', 'user');
+		$this->load->model('access_model', 'access');
 		
 		try {
 			// get the characters
@@ -152,7 +153,7 @@ abstract class Nova_upgradeajax extends Controller {
 						'leave_date'		=> $r->leaveDate,
 						'status'			=> ($r->crewType != 'active' and $r->crewType != 'pending') ? 'inactive' : $r->crewType,
 						'password_reset'	=> 1,
-						'access_role'		=> 4,
+						'access_role'		=> Access_Model::STANDARD,
 					);
 					
 					if ( ! isset($users[$r->email]['main_char']))
@@ -257,18 +258,19 @@ abstract class Nova_upgradeajax extends Controller {
 					6 	=> $c->hairColor,
 					7 	=> $c->eyeColor,
 					8 	=> $c->physicalDesc,
-					9 	=> $c->spouse,
-					10 	=> $c->children,
-					11 	=> $c->father,
-					12 	=> $c->mother,
-					13 	=> $c->brothers."\r\n\r\n".$c->sisters,
-					14 	=> $c->otherFamily,
-					15 	=> $c->personalityOverview,
-					16 	=> $c->strengths,
-					17 	=> $c->ambitions,
-					18 	=> $c->hobbies,
-					19 	=> $c->history,
-					20 	=> $c->serviceRecord,
+					9 	=> $c->personalityOverview,
+					10 	=> $c->strengths,
+					11 	=> $c->ambitions,
+					12 	=> $c->hobbies,
+					13 	=> $c->spouse,
+					14 	=> $c->children,
+					15 	=> $c->father,
+					16 	=> $c->mother,
+					17 	=> $c->brothers,
+					18	=> $c->sisters,
+					19 	=> $c->otherFamily,
+					20 	=> $c->history,
+					21 	=> $c->serviceRecord,
 					$langID => $c->languages,
 				);
 				
@@ -524,6 +526,7 @@ abstract class Nova_upgradeajax extends Controller {
 		$roles = $_POST['roles'];
 		
 		$this->load->model('users_model', 'user');
+		$this->load->model('access_model', 'access');
 		
 		try {
 			// temporary array
@@ -531,7 +534,7 @@ abstract class Nova_upgradeajax extends Controller {
 			
 			foreach ($roles as $r)
 			{
-				$saved[] = $this->user->update_user($r, array('access_role' => 1));
+				$saved[] = $this->user->update_user($r, array('access_role' => Access_Model::SYSADMIN));
 			}
 			
 			if ( ! in_array(true, $saved))
@@ -806,7 +809,9 @@ abstract class Nova_upgradeajax extends Controller {
 					'type' => 'TEXT'),
 				'post_last_update' => array(
 					'type' => 'BIGINT',
-					'constraint' => 20)
+					'constraint' => 20),
+				'post_participants' => array(
+					'type' => 'TEXT')
 			);
 			
 			// do the modifications

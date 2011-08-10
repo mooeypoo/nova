@@ -61,7 +61,7 @@
 				</p><br />
 				
 				<?php if ($level >= 2): ?>
-					<?php if (($level == 2 && $inputs['crew_type'] == 'npc') || $level == 3): ?>
+					<?php if (($level == 2 and $inputs['crew_type'] == 'npc') or $level == 3): ?>
 						<p>
 							<kbd><?php echo $label['position1'];?></kbd>
 							<?php echo form_dropdown_position('position_1', $inputs['position1_id'], 'id="position1"', 'all');?>
@@ -128,7 +128,7 @@
 		<div id="three">
 			<?php echo text_output($image_instructions);?>
 			
-			<p><?php echo anchor('upload/index', img($images['upload']) .' '. $label['upload'], array('class' => 'image fontMedium bold'));?></p>
+			<p><?php echo link_to_if(Auth::check_access('upload/index', false), 'upload/index', img($images['upload']) .' '. $label['upload'], array('class' => 'image fontMedium bold'));?></p>
 			
 			<ul id="list-grid">
 			<?php if (is_array($inputs['images']) && count($inputs['images']) > 0): ?>

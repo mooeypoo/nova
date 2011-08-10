@@ -1,7 +1,46 @@
 <?php $string = random_string('alnum', 8);?>
 
 <script type="text/javascript">
+	function checkLock() {
+		var send = {
+			post: "<?php echo $this->uri->segment(3);?>",
+			content: $('#content-textarea').val()
+		}
+		
+		$.ajax({
+			type: "POST",
+			url: "<?php echo site_url('ajax/info_check_post_lock');?>",
+			data: send,
+			success: function(data){
+				$('#readonly').hide();
+				$('#editable').show();
+				
+				if (data == 1 || data == 2)
+				{
+					window.location = "<?php echo site_url('write/index');?>";
+				}
+				else if (data == 6)
+				{
+					$('#editable').hide();
+					$('#readonly').show();
+				}
+					
+			}
+		});
+	}
+	
 	$(document).ready(function(){
+		
+		// using the CI user agent library instead of jquery's $.browser since the latter is deprecated
+		var browser = "<?php echo $this->agent->browser();?>";
+		var version = parseFloat("<?php echo $this->agent->version();?>");
+		
+		// check to see if we should be using the Chosen plugin
+		if (browser == 'Internet Explorer' && version < 8)
+			$('#chosen-incompat').show();
+		else
+			$('.chosen').chosen();
+		
 		$('#toggle_notes').click(function(){
 			$('.notes_content').slideToggle('fast');
 			return false;
@@ -17,53 +56,7 @@
 		
 		$('#content-textarea').elastic();
 		
-		$('a#add_author').click(function() {
-			var user = $('#all').val();
-			var hidden = $('#authors_hidden').val();
-			var name = $("option[value='" + user + "']").html();
-			
-			if (user != 0 && $("#all option[value='" + user + "']").is(':disabled') == false)
-			{
-				if (hidden == 0)
-				{
-					hidden = '';
-				}
-				
-				$('#authors_hidden').val(hidden + ',' + user + ',');
-				
-				$('#authors').append('<span class="' + user + '"><a href="#" id="remove_author" class="image" myID="' + user + '" myName="' + name + '"><?php echo $remove;?></a>' + name + '<br /></span>');
-				
-				$("#all option[value='" + user + "']").prop({ disabled: true });
-			}
-			
-			return false;
-		});
-		
-		$('a#remove_author').live('click', function(event) {
-			var user = $(this).attr('myID');
-			var name = $(this).attr('myName');
-			var hidden = $('#authors_hidden').val();
-			var new_hidden = hidden.replace(user, "");
-			
-			/* update the hidden field */
-			$('#authors_hidden').val(new_hidden);
-			
-			/* remove the name from the list */
-			$('#authors span.' + user).remove();
-			
-			/* show the option again */
-			$("#all option[value='" + user + "']").prop({ disabled: false });
-			
-			return false;
-		});
-		
-		<?php if (isset($replyall)): ?>
-			<?php foreach ($replyall as $r): ?>
-				$("#all option[value='<?php echo $r;?>']").prop({ disabled: true });
-			<?php endforeach; ?>
-		<?php endif; ?>
-		
-		<?php if ($missionCount == 0 && $authorized === TRUE): ?>
+		<?php if ($missionCount == 0 and $authorized): ?>
 			$.facebox(function(){
 				$.get('<?php echo site_url('ajax/add_mission');?>/<?php echo $string;?>', function(data) {
 					$.facebox(data);
@@ -81,6 +74,15 @@
 					data: { title: title, desc: desc, option: option }
 				});
 			});
+		<?php endif;?>
+		
+		// check the post lock ONLY if we're editing a post
+		<?php if ($this->uri->segment(3)): ?>
+			// run the check as soon as we get here
+			checkLock();
+			
+			// now start the normal timer
+			setInterval("checkLock()", 300000);
 		<?php endif;?>
 	});
 </script>

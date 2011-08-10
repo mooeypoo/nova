@@ -82,6 +82,7 @@ abstract class Nova_install extends Controller {
 			'title_remove' => lang('install_options_remove_title'),
 			'title_upd' => lang('install_options_upd_title'),
 			'title_upg' => lang('install_options_upg_title'),
+			'title_site' => lang('global_back_site'),
 		);
 		
 		$data['installed'] = $this->installed;
@@ -352,12 +353,13 @@ abstract class Nova_install extends Controller {
 				case 'change':
 					$this->load->dbforge();
 					
+					// get the genre
 					$file = $this->input->post('genre', true);
 					
-					$under = strpos($file, '_');
-					$selected_genre = strtolower(substr($file, 0, $under));
+					// drop the .php extension off
+					$selected_genre = strtolower(substr($file, 0, -4));
 					
-					include_once MODPATH.'assets/install/fields'.EXT;
+					include_once MODPATH.'assets/install/fields.php';
 					
 					$tables = array(
 						'departments_'. $selected_genre => array(
@@ -375,7 +377,7 @@ abstract class Nova_install extends Controller {
 					{
 						$this->dbforge->add_field($value['fields']);
 						$this->dbforge->add_key($value['id'], true);
-						$this->dbforge->create_table($key, true);
+						$verify[$key] = $this->dbforge->create_table($key, true);
 					}
 					
 					include_once MODPATH.'assets/install/genres/'.$file;
@@ -425,7 +427,7 @@ abstract class Nova_install extends Controller {
 						$this->load->helper('directory');
 						
 						// grab the files from the directory
-						$genre_files = directory_map(APPPATH.'assets/install/genres/', true);
+						$genre_files = directory_map(MODPATH.'assets/install/genres/', true);
 						
 						// grab the genre and find out it's length
 						$genre = strtolower(GENRE);
@@ -1368,6 +1370,7 @@ abstract class Nova_install extends Controller {
 				$this->load->model('positions_model', 'pos');
 				$this->load->model('ranks_model', 'ranks');
 				$this->load->model('settings_model', 'settings');
+				$this->load->model('access_model', 'access');
 				
 				if ($submit !== false)
 				{
@@ -1379,7 +1382,7 @@ abstract class Nova_install extends Controller {
 						'email'				=> $this->input->post('email', true),
 						'password'			=> Auth::hash($this->input->post('password', true)),
 						'date_of_birth'		=> $this->input->post('dob', true),
-						'access_role'		=> 1,
+						'access_role'		=> Access_Model::SYSADMIN,
 						'is_sysadmin'		=> 'y',
 						'is_game_master'	=> 'y',
 						'is_webmaster'		=> 'y',

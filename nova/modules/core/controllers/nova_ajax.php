@@ -9,8 +9,6 @@
  * @version		2.0
  */
 
-#TODO: need to secure all of these methods!
-
 abstract class Nova_ajax extends Controller {
 	
 	/**
@@ -734,9 +732,10 @@ abstract class Nova_ajax extends Controller {
 	
 	public function add_comment_wiki()
 	{
-		$allowed = Auth::is_logged_in();
+		$allowed = Auth::check_access('wiki/page', false);
+		$level = Auth::get_access_level('wiki/page');
 		
-		if ($allowed)
+		if ($allowed and $level >= 1)
 		{
 			$head = sprintf(
 				lang('fbx_head'),
@@ -2824,7 +2823,8 @@ abstract class Nova_ajax extends Controller {
 				lang('global_character'),
 				lang('global_character'),
 				lang('global_character'),
-				lang('global_user')
+				lang('global_user'),
+				lang('fbx_content_character_selections')
 			);
 			$data['current_user'] = $char->user;
 			$data['active_user'] = ($user->status != 'active') ? false : true;
@@ -2881,18 +2881,25 @@ abstract class Nova_ajax extends Controller {
 			// get the user
 			$user = $this->user->get_user($char->user);
 			
-			// get all active characters for the user
-			$characters = $this->char->get_user_characters($char->user, 'active', 'array');
+			$has_more_characters = true;
 			
-			if (count($characters) > 1)
+			if ($id == $user->main_char)
 			{
-				foreach ($characters as $c)
+				// get all active characters for the user
+				$characters = $this->char->get_user_characters($char->user, 'active', 'array');
+				
+				if (count($characters) > 1)
 				{
-					if ($c != $id)
+					foreach ($characters as $c)
 					{
-						$data['characters'][$c] = $this->char->get_character_name($c, true);
+						if ($c != $id)
+						{
+							$data['characters'][$c] = $this->char->get_character_name($c, true);
+						}
 					}
 				}
+				
+				$has_more_characters = (isset($data['characters']));
 			}
 			
 			// data being sent to the facebox
@@ -2902,16 +2909,30 @@ abstract class Nova_ajax extends Controller {
 				lang('fbx_content_character_deactivate'),
 				parse_name(array($this->rank->get_rank($char->rank, 'rank_name'), $char->first_name, $char->last_name)),
 				lang('global_character'),
-				lang('global_user'),
-				lang('global_character'),
-				lang('global_characters'),
-				lang('global_user'),
-				lang('global_character'),
-				lang('global_character'),
-				lang('global_user'),
-				lang('global_character')
+				
+				( ! $has_more_characters or isset($data['characters']))
+					? "\r\n\r\n"
+					: '',
+				
+				( ! $has_more_characters)
+					? sprintf(lang('fbx_content_character_deactivate_userdeac'), lang('global_characters'), lang('global_user'), lang('global_user'))
+					: '',
+					
+				(isset($data['characters']))
+					? sprintf(
+						lang('fbx_content_character_deactivate_newmainchar'), 
+						lang('global_character'), 
+						lang('global_character'), 
+						lang('global_user'), 
+						lang('global_character'), 
+						lang('global_user'))
+					: '',
+					
+				( ! $has_more_characters or isset($data['characters']))
+					? lang('fbx_content_character_selections')
+					: ''
 			);
-			$data['has_characters'] = (count($characters) > 1);
+			$data['has_characters'] = $has_more_characters;
 			$data['label']['deactivate_user'] = ucwords(lang('actions_deactivate').' '.lang('global_user'));
 			
 			$button = array(
@@ -2936,20 +2957,202 @@ abstract class Nova_ajax extends Controller {
 	
 	public function character_npc($id)
 	{
-		// we'll be coming from both active and inactive characters
+		$allowed = Auth::check_access('characters/bio', false);
+		$level = Auth::get_access_level('characters/bio');
 		
-		// if this is someone's main character, we need to offer them the option to set a new main character
-		
-		// if doing this makes someone not have a character, we need to offer to deactivate the user
+		if ($allowed and $level == 3)
+		{
+			// load the models
+			$this->load->model('users_model', 'user');
+			$this->load->model('characters_model', 'char');
+			$this->load->model('ranks_model', 'rank');
+			$this->load->model('positions_model', 'pos');
+			$this->load->helper('utility');
+			
+			// sanity check
+			$id = (is_numeric($id)) ? $id : false;
+			
+			$head = sprintf(
+				lang('fbx_head'),
+				ucwords(lang('actions_change')),
+				ucfirst(lang('global_character')).' '.lang('labels_to').' '.strtoupper(lang('abbr_npc'))
+			);
+			
+			// get the character
+			$char = $this->char->get_character($id);
+			
+			// get the user
+			$user = $this->user->get_user($char->user);
+			
+			$has_more_characters = true;
+			
+			if ($id == $user->main_char)
+			{
+				// get all active characters for the user
+				$characters = $this->char->get_user_characters($char->user, 'active', 'array');
+				
+				foreach ($characters as $c)
+				{
+					if ($c != $id)
+					{
+						$data['characters'][$c] = $this->char->get_character_name($c, true);
+					}
+				}
+				
+				$has_more_characters = (isset($data['characters']));
+			}
+			
+			// data being sent to the facebox
+			$data['header'] = $head;
+			$data['id'] = $id;
+			$data['text'] = sprintf(
+				lang('fbx_content_character_npc'),
+				parse_name(array($this->rank->get_rank($char->rank, 'rank_name'), $char->first_name, $char->last_name)),
+				lang('status_nonplaying'),
+				lang('global_character'),
+				
+				(($char->user !== 0 and $char->user !== null) or ! $has_more_characters or ($id == $user->main_char and $has_more_characters))
+					? "\r\n\r\n"
+					: '',
+				
+				($char->user !== 0 and $char->user !== null)
+					? sprintf(lang('fbx_content_character_npc_removeuser'), lang('global_user'), lang('global_character'))
+					: '',
+					
+				( ! $has_more_characters)
+					? sprintf(
+						lang('fbx_content_character_npc_deacuser'), 
+						lang('global_character'), 
+						lang('global_character'), 
+						lang('global_user'),
+						lang('global_user'))
+					: '',
+					
+				($id == $user->main_char and $has_more_characters)
+					? sprintf(
+						lang('fbx_content_character_npc_newmain'), 
+						lang('global_character'), 
+						lang('global_character'), 
+						lang('global_user'),
+						lang('global_character'))
+					: '',
+					
+				(($char->user !== 0 and $char->user !== null) or ! $has_more_characters or ($id == $user->main_char and $has_more_characters))
+					? lang('fbx_content_character_selections')
+					: ''
+			);
+			$data['has_characters'] = $has_more_characters;
+			$data['is_main_character'] = ($id == $user->main_char);
+			$data['label']['deactivate_user'] = ucwords(lang('actions_deactivate').' '.lang('global_user'));
+			$data['label']['remove_user'] = ucwords(lang('actions_remove').' '.lang('global_user').' '.lang('labels_association'));
+			
+			$button = array(
+				'type' => 'submit',
+				'class' => 'hud_button',
+				'name' => 'submit',
+				'value' => 'submit',
+				'content' => ucwords(lang('actions_submit'))
+			);
+			
+			// figure out the skin
+			$skin = $this->session->userdata('skin_admin');
+			
+			$this->_regions['content'] = Location::ajax('character_npc', $skin, 'admin', $data);
+			$this->_regions['controls'] = form_button($button).form_close();
+			
+			Template::assign($this->_regions);
+			
+			Template::render();
+		}
 	}
 	
 	public function charcter_playing_character($id)
 	{
-		// we'll always be doing this from an npc
+		$allowed = Auth::check_access('characters/bio', false);
+		$level = Auth::get_access_level('characters/bio');
 		
-		// need to provide an option to make the character someone's main character
-		
-		// if we're making the npc a character assocated with a user who is inactive, we need to reactivate the user
+		if ($allowed and $level == 3)
+		{
+			// load the models
+			$this->load->model('users_model', 'user');
+			$this->load->model('characters_model', 'char');
+			$this->load->model('ranks_model', 'rank');
+			$this->load->model('positions_model', 'pos');
+			$this->load->helper('utility');
+			
+			// sanity check
+			$id = (is_numeric($id)) ? $id : false;
+			
+			$head = sprintf(
+				lang('fbx_head'),
+				ucwords(lang('actions_change')),
+				strtoupper(lang('abbr_npc')).' '.lang('labels_to').' '.ucfirst(lang('global_character'))
+			);
+			
+			// get the character
+			$char = $this->char->get_character($id);
+			
+			// get the user
+			$user = $this->user->get_user($char->user);
+			
+			// get all the users in the system
+			$users = $this->user->get_users(null);
+			
+			if ($users->num_rows() > 0)
+			{
+				$data['users'][0] = ucwords(lang('actions_remove').' '.lang('global_user').' '.lang('labels_association'));
+				
+				// make sure the active users are listed first
+				$data['users'][ucwords(lang('status_active').' '.lang('global_users'))] = array();
+				
+				foreach ($users->result() as $u)
+				{
+					$type = ucwords($u->status.' '.lang('global_users'));
+					
+					if ($u->status != 'pending')
+					{
+						$data['users'][$type][$u->userid] = $u->name.' ('.$u->email.')';
+					}
+				}
+			}
+			
+			// data being sent to the facebox
+			$data['header'] = $head;
+			$data['id'] = $id;
+			$data['text'] = sprintf(
+				lang('fbx_content_character_playing'),
+				parse_name(array($this->rank->get_rank($char->rank, 'rank_name'), $char->first_name, $char->last_name)),
+				lang('status_playing'),
+				lang('global_character'),
+				lang('global_user'),
+				lang('global_character'),
+				lang('global_user'),
+				lang('global_character'),
+				lang('global_character'),
+				lang('global_user'),
+				lang('fbx_content_character_selections')
+			);
+			$data['user'] = $char->user;
+			$data['label']['main_character'] = ucwords(lang('actions_make').' '.lang('order_primary').' '.lang('global_character'));
+			
+			$button = array(
+				'type' => 'submit',
+				'class' => 'hud_button',
+				'name' => 'submit',
+				'value' => 'submit',
+				'content' => ucwords(lang('actions_submit'))
+			);
+			
+			// figure out the skin
+			$skin = $this->session->userdata('skin_admin');
+			
+			$this->_regions['content'] = Location::ajax('character_playing', $skin, 'admin', $data);
+			$this->_regions['controls'] = form_button($button).form_close();
+			
+			Template::assign($this->_regions);
+			
+			Template::render();
+		}
 	}
 	
 	public function del_award()
@@ -4452,7 +4655,7 @@ abstract class Nova_ajax extends Controller {
 	
 	public function del_npc()
 	{
-		$allowed = Auth::check_access('manage/npcs', false);
+		$allowed = Auth::check_access('characters/npcs', false);
 		
 		if ($allowed)
 		{
@@ -7501,6 +7704,189 @@ abstract class Nova_ajax extends Controller {
 		}
 	}
 	
+	public function info_check_post_lock()
+	{
+		// load the resources
+		$this->load->model('posts_model', 'posts');
+		
+		// set the variables
+		$post = $this->input->post('post', true);
+		$content = $this->input->post('content', true);
+		$time = now();
+		$user = $this->session->userdata('userid');
+		
+		// get the post
+		$item = $this->posts->get_post($post);
+		
+		// hash the post contents from the db
+		$db_hash = md5($item->post_content);
+		
+		// hash the post contents from the POST variable
+		$post_hash = md5($content);
+		
+		// get the difference between how many minutes since the lock was activated
+		$diff = now() - $item->post_lock_date;
+		$diff = ($diff / 60);
+		$diff = floor($diff);
+		
+		if ($item->post_lock_user !== $user)
+		{
+			if ($item->post_lock_user === null)
+			{
+				/**
+				 * CODE 5
+				 *
+				 * There is no lock on this post, so we're going to assign a lock
+				 * to the current user and send the code back to the view to do
+				 * nothing and let the user continue working with the new lock.
+				 */
+				
+				// auto-save the content
+				$data = array(
+					'post_lock_user' => $user,
+					'post_lock_date' => now()
+				);
+				
+				// update the post
+				$this->posts->update_post($post, $data);
+				
+				// the code
+				$retval = 5;
+			}
+			else
+			{
+				if ($diff < 5)
+				{
+					/**
+					 * CODE 6
+					 *
+					 * Someone else owns the lock and it is active so there's nothing we
+					 * can do here. Send the code back to the view and wait another 5 minutes
+					 * to check the lock again.
+					 */
+					 
+					$retval = 6;
+				}
+				else
+				{
+					/**
+					 * CODE 7
+					 *
+					 * Someone else owned the lock, but it isn't active any more, so take over
+					 * the lock, send the code back to the view and start the process.
+					 */
+					
+					// save the lock
+					$data = array(
+						'post_lock_user' => $user,
+						'post_lock_date' => now()
+					);
+					
+					// update the post
+					$this->posts->update_post($post, $data);
+					
+					$retval = 7;
+				}
+			}
+		}
+		else
+		{
+			/**
+			 * CODE 1
+			 *
+			 * There haven't been any changes to the post since the initial
+			 * lock was granted. Release the lock and send the code back to
+			 * the view to redirect to the Writing Control Panel.
+			 */
+			if ($post_hash == $db_hash)
+			{
+				$this->posts->update_post_lock($post, null, false);
+				
+				$retval = 1;
+			}
+			
+			if ($post_hash != $db_hash)
+			{
+				if ($this->session->userdata('post_lock_'.$post))
+				{
+					/**
+					 * CODE 2
+					 *
+					 * Changes have been made that differ from the content from
+					 * the database, but the post is the same as it was 5 minutes
+					 * ago. Auto-save the post content (but don't change the saved
+					 * author information or send an email), release then lock then
+					 * send the code back to the view to redirect back to the
+					 * Writing Control Panel.
+					 */
+					if ($post_hash == $this->session->userdata('post_lock_'.$post))
+					{
+						// auto-save the content
+						$data = array(
+							'post_content' => $content,
+							'post_lock_user' => null,
+							'post_lock_date' => null
+						);
+						
+						// update the post
+						$this->posts->update_post($post, $data);
+						
+						// remove the session data
+						$this->session->unset_userdata('post_lock_'.$post);
+						
+						// the code
+						$retval = 2;
+					}
+					
+					/**
+					 * CODE 3
+					 *
+					 * Changes have been made that differ from the content from
+					 * the database and the post is different from the check 5
+					 * minutes ago. Store a hash of the content in the session
+					 * (or update what's already there), renew the lock and send
+					 * the code back to the view to do nothing and let the user
+					 * continue working.
+					 */
+					if ($post_hash != $this->session->userdata('post_lock_'.$post))
+					{
+						// set the session data
+						$this->session->set_userdata('post_lock_'.$post, $post_hash);
+						
+						// update the lock
+						$this->posts->update_post_lock($post, $this->session->userdata('userid'));
+						
+						// the code
+						$retval = 3;
+					}
+				}
+				
+				/**
+				 * CODE 4
+				 *
+				 * Changes have been made that differ from the content from
+				 * the database and no session variable exists that's storing
+				 * the hash of the previous check. Send the hash of the content
+				 * to the session, renew the lock and send the code back to 
+				 * the view to do nothing and let the user continue working.
+				 */
+				if ( ! $this->session->userdata('post_lock_'.$post))
+				{
+					// set the session data
+					$this->session->set_userdata('post_lock_'.$post, $post_hash);
+					
+					// update the lock
+					$this->posts->update_post_lock($post, $this->session->userdata('userid'));
+					
+					// the code
+					$retval = 4;
+				}
+			}
+		}
+		
+		echo $retval;
+	}
+	
 	public function info_format_date()
 	{
 		$format = $this->input->post('format', true);
@@ -7533,6 +7919,10 @@ abstract class Nova_ajax extends Controller {
 			$data['text'] = sprintf(
 				lang('fbx_content_info_users_with_role'),
 				$role->role_name
+			);
+			
+			$data['label'] = array(
+				'notfound' => sprintf(lang('error_not_found'), lang('global_users')),
 			);
 			
 			$users = $this->access->get_users_with_role($data['id']);

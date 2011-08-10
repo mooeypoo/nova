@@ -78,9 +78,10 @@ abstract class Nova_posts_model extends Model {
 	 * @param	mixed	either the character ID or an array of character IDs
 	 * @param	int		the number of records to limit the result to
 	 * @param	string	the status to pull
+	 * @param	int		the offset
 	 * @return	object	the result object
 	 */
-	public function get_character_posts($character = '', $limit = 0, $status = 'activated')
+	public function get_character_posts($character = '', $limit = 0, $status = 'activated', $offset = 0)
 	{
 		$this->db->from('posts');
 		
@@ -115,7 +116,7 @@ abstract class Nova_posts_model extends Model {
 		}
 		else
 		{
-			$string = "(post_authors LIKE '%,$character' OR post_authors LIKE '$character,%' OR post_authors = '%,$character,%' OR post_authors = $character)";
+			$string = "(post_authors LIKE '%,$character' OR post_authors LIKE '$character,%' OR post_authors LIKE '%,$character,%' OR post_authors = $character)";
 			
 			$this->db->where("$string", null);
 		}
@@ -124,7 +125,7 @@ abstract class Nova_posts_model extends Model {
 		
 		if ($limit > 0)
 		{
-			$this->db->limit($limit);
+			$this->db->limit($limit, $offset);
 		}
 		
 		$query = $this->db->get();
@@ -653,6 +654,30 @@ abstract class Nova_posts_model extends Model {
 		$query = $this->db->update('posts_comments', $data);
 		
 		$this->dbutil->optimize_table('posts_comments');
+		
+		return $query;
+	}
+	
+	/**
+	 * Update a post lock.
+	 *
+	 * @access	public
+	 * @since	2.0
+	 * @param	int		the post ID
+	 * @param	int		the user ID
+	 * @param	bool	retain the lock?
+	 */
+	public function update_post_lock($post, $user, $retain_lock = true)
+	{
+		$data = array(
+			'post_lock_user' => $user,
+			'post_lock_date' => ($retain_lock) ? now() : null
+		);
+		
+		$this->db->where('post_id', $post);
+		$query = $this->db->update('posts', $data);
+		
+		$this->dbutil->optimize_table('posts');
 		
 		return $query;
 	}

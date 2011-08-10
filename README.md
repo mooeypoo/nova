@@ -16,6 +16,8 @@ Anodyne Production's next-generation RPG management system combines popular feat
 * added the ability for site messages to have previously disallowed HTML tags (like embed, iframe, etc.) for embedding media assets from YouTube and Vimeo
 * added the ability to nest mission groups one level deep
 * added the ability for someone with level 2 admin rights to reset someone's password (the new password will be emailed to the user and they'll be prompted to reset the password the next time they log in)
+* added the jQuery Chosen plugin for easier selection of mission post and private message authors (IE 8 and higher, all other browsers)
+* added post locking to prevent changes from being overwritten while users are working on joint posts
 * updated seamless substitution to be able to override email view files
 * updated Thresher with a new way to create and manage categories when working on a wiki page
 * updated Thresher with a completely new user experience for managing wiki pages
@@ -23,8 +25,8 @@ Anodyne Production's next-generation RPG management system combines popular feat
 * updated the upload instructions to include the maximum file size and maximum image dimensions from the config file for reference
 * updated the deck listing page (sim/decks) to not use a table which makes for a much cleaner layout
 * updated the deck listing page (sim/decks) to have a menu of decks for quickly moving to a deck item without having to scroll (handy for sim with lots of decks)
-* updated to jquery version 1.6.1
-* updated to jquery version 1.8.13
+* updated to jquery version 1.6.2
+* updated to jquery version 1.8.15
 * updated to uniform version 1.7.5
 * updated to prettyPhoto version 3.1.2
 * updated to qTip2
@@ -40,6 +42,13 @@ Anodyne Production's next-generation RPG management system combines popular feat
 * updated the user account page so that when activating a user, it will prompt the admin about which of the user's inactive character should be reactivated
 * updated thresher so that users who don't have level 1 wiki page access can't see wiki page history
 * updated thresher so that only users who are logged in can see comments on a wiki page
+* updated the character bio page so admins can activate an inactive character (and all related actions) with the push of a button
+* updated the character bio page so admins can deactivate an active character (and all related actions) with the push of a button
+* updated the character bio page so admins can make an NPC an active character (and all related actions) with the push of a button
+* updated the character bio page so admins can make a character an NPC (and all related actions) with the push of a button
+* updated the access role model with constants for the default access levels
+* updated the view character posts page to use pagination
+* updated the view character logs page to use pagination
 * refactored the location helper into a full-blown class with static methods
 * refactored the upgrade process to mirror what was created for nova 3
 * removed the banned.php file
@@ -50,7 +59,13 @@ Anodyne Production's next-generation RPG management system combines popular feat
 * fixed bug where the join form could be submitted without an email address or password
 * fixed bug where users who were deactivated kept their account flags (sysadmin, game master, etc.) and their access role
 * fixed bug where users who were reactivated didn't have their access role set to Standard User
+* fixed bug where inactive users were shown a link to upload an image even though they don't have permissions to upload images
 * fixed several potential security issues
+* fixed bug where positions weren't properly updated when deleting an active character
+* fixed some Pulsar styling issues in IE9
+* fixed some Titan styling issues in IE9
+* fixed bug where the nominated by line was shown when viewing character/user awards even if there was no nominee (only an issue when upgrading from SMS)
+* fixed issues with the ENT genre install file
 
 ## Version History
 
@@ -60,6 +75,9 @@ Anodyne Production's next-generation RPG management system combines popular feat
 	</tr>
 	<tr>
 		<td>2.0</td><td>-</td>
+	</tr>
+	<tr>
+		<td>1.2.6</td><td>15 July 2011</td>
 	</tr>
 	<tr>
 		<td>1.2.5</td><td>16 June 2011</td>

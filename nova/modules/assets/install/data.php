@@ -1489,7 +1489,8 @@ $menu_items = array(
 		'menu_sim_type' => 1,
 		'menu_type' => 'adminsub',
 		'menu_cat' => 'manage',
-		'menu_use_access' => 'n'),
+		'menu_use_access' => 'y',
+		'menu_access' => 'upload/index'),
 	array(
 		'menu_name' => 'Manage Uploads',
 		'menu_group' => 3,
@@ -2240,12 +2241,12 @@ $system_components = array(
 		'comp_url' => 'http://www.williamsconcepts.com/ci/codeigniter/libraries/template/index.html'),
 	array(
 		'comp_name' => 'jQuery',
-		'comp_version' => '1.6.1',
+		'comp_version' => '1.6.2',
 		'comp_url' => 'http://www.jquery.com/',
 		'comp_desc' => 'jQuery is a lightweight JavaScript library that emphasizes interaction between JavaScript and HTML.'),
 	array(
 		'comp_name' => 'jQuery UI',
-		'comp_version' => '1.8.13',
+		'comp_version' => '1.8.15',
 		'comp_url' => 'http://jqueryui.com/',
 		'comp_desc' => 'jQuery UI is a lightweight, easily customizable interface library for the jQuery Javascript library.'),
 	array(
@@ -2318,6 +2319,11 @@ $system_components = array(
 		'comp_version' => '1.7.5',
 		'comp_desc' => "Uniform masks your standard form controls with custom themed controls. It works in sync with your real form elements to ensure accessibility and compatibility.",
 		'comp_url' => 'http://github.com/pixelmatrix/uniform'),
+	array(
+		'comp_name' => 'Chosen',
+		'comp_version' => '',
+		'comp_desc' => "Chosen is a JavaScript plugin that makes long, unwieldy select boxes much more user-friendly.",
+		'comp_url' => 'http://harvesthq.github.com/chosen/'),
 );
 
 $system_info = array(

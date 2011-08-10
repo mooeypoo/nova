@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 /**
- * Update Nova from 1.2.5 to 2.0
+ * Update Nova from 1.2.6 to 2.0
  */
 $system_versions	= null;
 $system_info		= null;
@@ -194,6 +194,12 @@ $add_column = array(
 	'posts' => array(
 		'post_participants' => array(
 			'type' => 'TEXT'),
+		'post_lock_user' => array(
+			'type' => 'INT',
+			'constraint' => 8),
+		'post_lock_date' => array(
+			'type' => 'BIGINT',
+			'constraint' => 20),
 	),
 	'mission_groups' => array(
 		'misgroup_parent' => array(
@@ -271,11 +277,11 @@ $this->db->update('system_components', array('comp_version' => '1.5'));
 
 // update the jquery version info
 $this->db->where('comp_name', 'jQuery');
-$this->db->update('system_components', array('comp_version' => '1.6.1'));
+$this->db->update('system_components', array('comp_version' => '1.6.2'));
 
 // update the jquery ui version info
 $this->db->where('comp_name', 'jQuery UI');
-$this->db->update('system_components', array('comp_version' => '1.8.13'));
+$this->db->update('system_components', array('comp_version' => '1.8.15'));
 
 // update the jquery prettyphoto info
 $this->db->where('comp_name', 'prettyPhoto');
@@ -289,12 +295,25 @@ $this->db->update('system_components', array('comp_version' => '1.1.10'));
 $this->db->where('comp_name', 'Thresher');
 $this->db->update('system_components', array('comp_version' => 'Release 2'));
 
+// update the upload images menu item
+$this->db->where('menu_link', 'upload/index');
+$this->db->update('menu_items', array('menu_use_access' => 'y', 'menu_access' => 'upload/index'));
+
 // add the elastic plugin to the list of components
 $additem = array(
 	'comp_name' => 'Elastic',
 	'comp_version' => '1.6.5',
 	'comp_desc' => "jQuery Elastic is a plugin that makes your textareas grow and shrink to fit its content and was inspired by the auto-growing textareas on Facebook.",
 	'comp_url' => 'http://www.unwrongest.com/projects/elastic/'
+);
+$this->db->insert('system_components', $additem);
+
+// add the chosen plugin to the list of components
+$additem = array(
+	'comp_name' => 'Chosen',
+	'comp_version' => '',
+	'comp_desc' => "Chosen is a JavaScript plugin that makes long, unwieldy select boxes much more user-friendly.",
+	'comp_url' => 'http://harvesthq.github.com/chosen/'
 );
 $this->db->insert('system_components', $additem);
 

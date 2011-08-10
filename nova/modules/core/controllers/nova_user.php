@@ -27,6 +27,7 @@ abstract class Nova_user extends Nova_controller_admin {
 		$id = ($level == 2) ? $this->uri->segment(3, $id, true) : $id;
 		
 		$this->load->model('positions_model', 'pos');
+		$this->load->model('access_model', 'access');
 		
 		$data['my_user'] = ($id == $this->session->userdata('userid'));
 		
@@ -128,7 +129,7 @@ abstract class Nova_user extends Nova_controller_admin {
 						$array['is_sysadmin'] = 'n';
 						$array['is_game_master'] = 'n';
 						$array['is_webmaster'] = 'n';
-						$array['access_role'] = 5;
+						$array['access_role'] = Access_Model::INACTIVE;
 					}
 
 					if ($old_status == 'inactive' and $array['status'] != 'inactive')
@@ -139,7 +140,7 @@ abstract class Nova_user extends Nova_controller_admin {
 						$this->user->update_all_user_prefs($id, 'y');
 						
 						// we're reactivating them, so make sure they have the standard access role
-						$array['access_role'] = 4;
+						$array['access_role'] = Access_Model::STANDARD;
 					}
 				}
 				
@@ -154,31 +155,34 @@ abstract class Nova_user extends Nova_controller_admin {
 				
 				if ($update > 0)
 				{
-					if ($array['loa'] != $old_loa)
+					if ($level == 2)
 					{
-						$loa = $this->user->get_last_loa($user, true);
+						if ($array['loa'] != $old_loa)
+						{
+							$loa = $this->user->get_last_loa($user, true);
 				
-						if ($loa->num_rows() > 0)
-						{
-							$row = $loa->row();
-							
-							$loa_array = array('loa_end_date' => now());
-							
-							$this->user->update_loa_record($row->loa_id, $loa_array);
-						}
-						else
-						{
-							if ($array['loa'] != 'active')
+							if ($loa->num_rows() > 0)
 							{
-								$loa_array = array(
-									'loa_user' => $user,
-									'loa_start_date' => now(),
-									'loa_type' => $array['loa'],
-									'loa_duration' => '',
-									'loa_reason' => ''
-								);
+								$row = $loa->row();
+							
+								$loa_array = array('loa_end_date' => now());
+							
+								$this->user->update_loa_record($row->loa_id, $loa_array);
+							}
+							else
+							{
+								if ($array['loa'] != 'active')
+								{
+									$loa_array = array(
+										'loa_user' => $user,
+										'loa_start_date' => now(),
+										'loa_type' => $array['loa'],
+										'loa_duration' => '',
+										'loa_reason' => ''
+									);
 								
-								$this->user->create_loa_record($loa_array);
+									$this->user->create_loa_record($loa_array);
+								}
 							}
 						}
 					}
@@ -211,7 +215,7 @@ abstract class Nova_user extends Nova_controller_admin {
 							$c_data = array(
 								'password' => array(
 									'name'   => $uid .'[password]',
-									'value'  => Auth::hash($password),
+									'value'  => $array['password'],
 									'expire' => '1209600',
 									'prefix' => 'nova_')
 							);
@@ -262,7 +266,7 @@ abstract class Nova_user extends Nova_controller_admin {
 				// update the user record
 				$useraction = $this->user->update_user($user, array(
 					'status' => 'inactive',
-					'access_role' => 5,
+					'access_role' => Access_Model::INACTIVE,
 					'is_sysadmin' => 'n',
 					'is_game_master' => 'n',
 					'is_webmaster' => 'n',
@@ -315,7 +319,7 @@ abstract class Nova_user extends Nova_controller_admin {
 				// update the user record
 				$useraction = $this->user->update_user($user, array(
 					'status' => 'active',
-					'access_role' => 4,
+					'access_role' => Access_Model::STANDARD,
 					'is_sysadmin' => 'n',
 					'is_game_master' => 'n',
 					'is_webmaster' => 'n',
@@ -1524,7 +1528,7 @@ abstract class Nova_user extends Nova_controller_admin {
 			'noawards' => sprintf(lang('error_not_found'), lang('global_awards')),
 			'nominate' => ucfirst(lang('actions_nominate')),
 			'nominatequeue' => ucwords(lang('labels_nomination') .' '. lang('labels_queue')),
-			'nonominations' => lang('error_no_award_nominations'),
+			'nonominations' => sprintf(lang('error_not_found'), lang('global_award').' '.lang('labels_nominations')),
 			'on' => lang('labels_on'),
 			'reason' => ucfirst(lang('labels_reason')),
 		);
@@ -2152,7 +2156,7 @@ abstract class Nova_user extends Nova_controller_admin {
 		}
 		
 		// send the email
-		//$email = $this->email->send();
+		$email = $this->email->send();
 		
 		return $email;
 	}
