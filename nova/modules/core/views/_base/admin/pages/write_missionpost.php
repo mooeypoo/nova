@@ -1,6 +1,6 @@
 <?php echo text_output($header, 'h1', 'page-head');?>
 
-<?php if (isset($missions) and $missions === false): ?>
+<?php if (isset($missions) and  ! $missions): ?>
 	<?php echo text_output($label['no_mission'], 'p', 'bold');?>
 <?php else: ?>
 	<?php if ($this->options['use_mission_notes'] == 'y'): ?>
@@ -82,10 +82,18 @@
 	</div>
 	
 	<div id="readonly" class="hidden">
-		<div id="notes">
-			<p class="float_left"><?php echo img($images['excl']);?>&nbsp;&nbsp;</p>
-			<?php echo text_output($label['locked'], 'h4');?>
-		</div>
+		<p class="fontMedium">
+			<?php echo anchor('write/index', $label['back_wcp']);?>
+			&middot;
+			<?php echo anchor('write/missionpost/'.$this->uri->segment(3), $label['more_edits']);?>
+		</p><br />
+		
+		<?php if ($inputs['locked']): ?>
+			<div id="notes">
+				<p class="float_left"><?php echo img($images['excl']);?>&nbsp;&nbsp;</p>
+				<?php echo text_output($label['locked'], 'h4');?>
+			</div>
+		<?php endif;?>
 		
 		<p>
 			<kbd><?php echo $label['authors'];?></kbd>

@@ -6,7 +6,6 @@
  * @category	Controller
  * @author		Anodyne Productions
  * @copyright	2011 Anodyne Productions
- * @version		2.0
  */
 
 require_once MODPATH.'core/libraries/Nova_controller_admin'.EXT;
@@ -36,9 +35,6 @@ abstract class Nova_write extends Nova_controller_admin {
 		$this->load->model('news_model', 'news');
 		$this->load->model('missions_model', 'mis');
 		
-		// set the variables
-		$js_data['tab'] = 0;
-		
 		$data['images'] = array(
 			'post' => array(
 				'src' => Location::img('write-post.png', $this->skin, 'admin'),
@@ -54,6 +50,26 @@ abstract class Nova_write extends Nova_controller_admin {
 				'alt' => ''),
 			'new' => array(
 				'src' => Location::img('icon-green-small.png', $this->skin, 'admin'),
+				'class' => 'image',
+				'alt' => ''),
+			'authors' => array(
+				'src' => Location::img('icon-user-small.png', $this->skin, 'admin'),
+				'class' => 'image',
+				'alt' => ''),
+			'lock' => array(
+				'src' => Location::img('icon-lock-small.png', $this->skin, 'admin'),
+				'class' => 'image',
+				'alt' => ''),
+			'edit' => array(
+				'src' => Location::img('icon-edit.png', $this->skin, 'admin'),
+				'class' => 'image',
+				'alt' => ''),
+			'view' => array(
+				'src' => Location::img('icon-view.png', $this->skin, 'admin'),
+				'class' => 'image',
+				'alt' => ''),
+			'unlock' => array(
+				'src' => Location::img('lock-unlock.png', $this->skin, 'admin'),
 				'class' => 'image',
 				'alt' => ''),
 		);
@@ -85,6 +101,7 @@ abstract class Nova_write extends Nova_controller_admin {
 				$data['posts_saved'][$i]['mission'] = $this->mis->get_mission($p->post_mission, 'mission_title');
 				$data['posts_saved'][$i]['mission_id'] = $p->post_mission;
 				$data['posts_saved'][$i]['saved'] = $p->post_saved;
+				$data['posts_saved'][$i]['locked'] = ($p->post_lock_user !== null and $p->post_lock_date !== null);
 				
 				++$i;
 			}
@@ -120,11 +137,6 @@ abstract class Nova_write extends Nova_controller_admin {
 				
 				++$i;
 			}
-		}
-		
-		if ($posts_saved->num_rows() == 0 and $logs_saved->num_rows() == 0 and $news_saved->num_rows() == 0)
-		{
-			$js_data['tab'] = 1;
 		}
 		
 		/*
@@ -257,9 +269,11 @@ abstract class Nova_write extends Nova_controller_admin {
 			'by' => lang('labels_by'),
 			'category' => ucfirst(lang('labels_category') .':'),
 			'date' => ucfirst(lang('labels_date')),
+			'locked' => sprintf(lang('post_locked_gen'), lang('global_missionpost'), lang('global_user')),
 			'mission' => ucfirst(lang('global_mission') .':'),
 			'missionposts' => ucwords(lang('global_missionposts')),
 			'newsitems' => ucwords(lang('global_newsitems')),
+			'no_saved' => sprintf(lang('error_not_found'), lang('status_saved').' '.lang('labels_entries')),
 			'no_logs' => sprintf(lang('error_not_found'), lang('global_personallogs')),
 			'no_news' => sprintf(lang('error_not_found'), lang('global_newsitems')),
 			'no_posts' => sprintf(lang('error_not_found'), lang('global_missionposts')),
@@ -280,7 +294,7 @@ abstract class Nova_write extends Nova_controller_admin {
 		);
 		
 		$this->_regions['content'] = Location::view('write_index', $this->skin, 'admin', $data);
-		$this->_regions['javascript'] = Location::js('write_index_js', $this->skin, 'admin', $js_data);
+		$this->_regions['javascript'] = Location::js('write_index_js', $this->skin, 'admin');
 		$this->_regions['title'].= $data['header'];
 		
 		Template::assign($this->_regions);
@@ -454,7 +468,7 @@ abstract class Nova_write extends Nova_controller_admin {
 										$flash['status'] = 'success';
 										$flash['message'] = text_output($message);
 										
-										if (count($author_array_final) > 1)
+										if (count($authors) > 1)
 										{
 											// set the array of data for the email
 											$email_data = array(
@@ -526,6 +540,8 @@ abstract class Nova_write extends Nova_controller_admin {
 									'post_mission' => $mission,
 									'post_saved' => $this->session->userdata('main_char'),
 									'post_participants' => $participants,
+									'post_lock_user' => null,
+									'post_lock_date' => null,
 								);
 								
 								$update = $this->posts->update_post($id, $update_array);
@@ -571,6 +587,8 @@ abstract class Nova_write extends Nova_controller_admin {
 									'post_mission' => $mission,
 									'post_saved' => $this->session->userdata('main_char'),
 									'post_participants' => $participants,
+									'post_lock_user' => null,
+									'post_lock_date' => null,
 								);
 								
 								$insert = $this->posts->create_mission_entry($insert_array);
@@ -703,7 +721,9 @@ abstract class Nova_write extends Nova_controller_admin {
 									'post_timeline' => $timeline,
 									'post_location' => $location,
 									'post_mission' => $mission,
-									'post_saved' => $this->session->userdata('main_char')
+									'post_saved' => $this->session->userdata('main_char'),
+									'post_lock_user' => null,
+									'post_lock_date' => null,
 								);
 								
 								$update = $this->posts->update_post($id, $update_array);
@@ -778,7 +798,9 @@ abstract class Nova_write extends Nova_controller_admin {
 									'post_status' => $status,
 									'post_timeline' => $timeline,
 									'post_location' => $location,
-									'post_mission' => $mission
+									'post_mission' => $mission,
+									'post_lock_user' => null,
+									'post_lock_date' => null,
 								);
 								
 								$insert = $this->posts->create_mission_entry($insert_array);
@@ -1020,7 +1042,8 @@ abstract class Nova_write extends Nova_controller_admin {
 				'name' => 'submit',
 				'value' => 'delete',
 				'id' => 'submitDelete',
-				'content' => ucwords(lang('actions_delete')))
+				'content' => ucwords(lang('actions_delete'))),
+			'locked' => ($row->post_lock_user !== null and $row->post_lock_date !== null),
 		);
 		
 		if ($missions->num_rows() > 0)
@@ -1068,7 +1091,7 @@ abstract class Nova_write extends Nova_controller_admin {
 		
 		$data['header'] = ucwords(lang('actions_write').' '.lang('global_missionpost'));
 		
-		$data['form_action'] = ($id !== false) ? 'write/missionpost/'.$id : 'write/missionpost';
+		$data['form_action'] = ($id) ? 'write/missionpost/'.$id.'/view' : 'write/missionpost';
 		
 		$data['images'] = array(
 			'excl' => array(
@@ -1080,10 +1103,12 @@ abstract class Nova_write extends Nova_controller_admin {
 		$data['label'] = array(
 			'addauthor' => ucwords(lang('actions_add') .' '. lang('labels_author')),
 			'authors' => ucfirst(lang('labels_authors')),
+			'back_wcp' => LARROW.' '.ucfirst(lang('actions_back')).' '.lang('labels_to').' '.ucwords(lang('labels_writing').' '.lang('labels_control').' '.lang('labels_panel')),
 			'content' => ucfirst(lang('labels_content')),
 			'location' => ucfirst(lang('labels_location')),
 			'mission' => ucfirst(lang('global_mission')),
 			'mission_notes' => ucwords(lang('global_mission') .' '. lang('labels_notes')),
+			'more_edits' => ucwords(lang('actions_keep').' '.lang('actions_editing')).' '.RARROW,
 			'myauthor' => ucwords(lang('labels_my') .' '. lang('labels_author')),
 			'no_mission' => $nomission,
 			'otherauthors' => ucwords(lang('labels_other') .' '. lang('labels_authors')),

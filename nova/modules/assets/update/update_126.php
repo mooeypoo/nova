@@ -206,6 +206,10 @@ $add_column = array(
 			'type' => 'INT',
 			'constraint' => 5,
 			'default' => 0),
+	),
+	'manifests' => array(
+		'manifest_view' => array(
+			'type' => 'TEXT'),
 	)
 );
 
@@ -299,15 +303,6 @@ $this->db->update('system_components', array('comp_version' => 'Release 2'));
 $this->db->where('menu_link', 'upload/index');
 $this->db->update('menu_items', array('menu_use_access' => 'y', 'menu_access' => 'upload/index'));
 
-// add the elastic plugin to the list of components
-$additem = array(
-	'comp_name' => 'Elastic',
-	'comp_version' => '1.6.5',
-	'comp_desc' => "jQuery Elastic is a plugin that makes your textareas grow and shrink to fit its content and was inspired by the auto-growing textareas on Facebook.",
-	'comp_url' => 'http://www.unwrongest.com/projects/elastic/'
-);
-$this->db->insert('system_components', $additem);
-
 // add the chosen plugin to the list of components
 $additem = array(
 	'comp_name' => 'Chosen',
@@ -329,6 +324,22 @@ $this->db->insert('settings', $additem);
 $this->db->where('page_url', 'wiki/page');
 $this->db->where('page_level', 3);
 $this->db->update('access_pages', array('page_desc' => "Can create, delete and edit all wiki pages (including system pages), including viewing history and reverting to previous drafts. Level 3 permissions can bypass all access restrictions on a wiki page."));
+
+// move the manifest view setting into the manifests table
+$manifests = $this->db->get('manifests');
+
+if ($manifests->num_rows() > 0)
+{
+	$this->db->from('settings')->where('setting_key', 'manifest_defaults');
+	$result = $this->db->get();
+	$row = ($result->num_rows() > 0) ? $result->row() : false;
+	$default_view = $row->setting_value;
+	
+	foreach ($manifests->result() as $m)
+	{
+		$this->db->update('manifests', array('manifest_view' => $default_view));
+	}
+}
 
 /**
  * Thresher system pages.

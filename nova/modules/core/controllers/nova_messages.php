@@ -6,7 +6,6 @@
  * @category	Controller
  * @author		Anodyne Productions
  * @copyright	2011 Anodyne Productions
- * @version		2.0
  */
 
 require_once MODPATH.'core/libraries/Nova_controller_admin'.EXT;
@@ -384,7 +383,7 @@ abstract class Nova_messages extends Nova_controller_admin {
 			$message = $this->input->post('message', true);
 			$recipients = $this->input->post('recipients', true);
 			
-			if ( ! is_array($recipients) and count($recipients) == 0)
+			if ( ! $recipients or ( ! is_array($recipients) and count($recipients) == 0))
 			{
 				$flash['status'] = 'error';
 				$flash['message'] = lang_output('flash_privmsgs_no_recipient');
@@ -523,11 +522,11 @@ abstract class Nova_messages extends Nova_controller_admin {
 		switch ($action)
 		{
 			case 'reply':
-				// is the RE: tag in the subject already?
-				$pos = strpos($row->privmsgs_subject, lang('abbr_reply'));
+				// how many times does the RE: string appear in the subject?
+				$re_count = substr_count($row->privmsgs_subject, lang('abbr_reply'));
 				
 				// make sure the subject is set right
-				$subj = ($pos === false) ? lang('abbr_reply').': '.$row->privmsgs_subject : $row->privmsgs_subject;
+				$subj = ($re_count == 0) ? lang('abbr_reply').': '.$row->privmsgs_subject : $row->privmsgs_subject;
 				
 				// set the subject value
 				$data['inputs']['subject']['value'] = $subj;
@@ -535,27 +534,8 @@ abstract class Nova_messages extends Nova_controller_admin {
 				// set the user
 				$selected = $row->privmsgs_author_user;
 				
-				// set the arrays
-				$active = array();
-				$inactive = array();
-				
-				if (isset($data['characters'][ucwords(lang('status_active') .' '. lang('global_characters'))]))
-				{
-					$active = $data['characters'][ucwords(lang('status_active') .' '. lang('global_characters'))];
-				}
-				
-				if (isset($data['characters'][ucwords(lang('status_inactive') .' '. lang('global_characters'))]))
-				{
-					$inactive = $data['characters'][ucwords(lang('status_inactive') .' '. lang('global_characters'))];
-				}
-				
 				// grab the key for the array
-				$key = (array_key_exists($selected, $active)) ? $selected : 0;
-				
-				if ($key == 0)
-				{
-					$key = (array_key_exists($selected, $inactive)) ? $selected : 0;
-				}
+				$key = (array_key_exists($selected, $data['characters'])) ? $selected : 0;
 				
 				// set the key
 				$data['recipient_list'] = $key;
@@ -585,11 +565,11 @@ abstract class Nova_messages extends Nova_controller_admin {
 				// set the hidden TO field
 				$data['recipient_list'] = implode(',', $recipient_list).','.$row->privmsgs_author_user;
 				
-				// is the RE: tag in the subject already?
-				$pos = strpos($row->privmsgs_subject, lang('abbr_reply'));
+				// how many times does the RE: string appear in the subject?
+				$re_count = substr_count($row->privmsgs_subject, lang('abbr_reply'));
 				
 				// make sure the subject is set right
-				$subj = ($pos === false) ? lang('abbr_reply').': '.$row->privmsgs_subject : $row->privmsgs_subject;
+				$subj = ($re_count == 0) ? lang('abbr_reply').': '.$row->privmsgs_subject : $row->privmsgs_subject;
 				
 				// set the subject value
 				$data['inputs']['subject']['value'] = $subj;
@@ -632,11 +612,11 @@ abstract class Nova_messages extends Nova_controller_admin {
 				$data['inputs']['message']['value'].= mdate($this->options['date_format'], $date);
 				$data['inputs']['message']['value'].= "\r\n\r\n". $row->privmsgs_content;
 				
-				// is the FWD: tag in the subject already?
-				$pos = strpos($row->privmsgs_subject, lang('abbr_forward'));
+				// how many times does the FWD: string appear in the subject?
+				$re_count = substr_count($row->privmsgs_subject, lang('abbr_forward'));
 				
 				// make sure the subject is set right
-				$subj = ($pos === false) ? lang('abbr_forward').': '.$row->privmsgs_subject : $row->privmsgs_subject;
+				$subj = ($re_count == 0) ? lang('abbr_forward').': '.$row->privmsgs_subject : $row->privmsgs_subject;
 				
 				// set the subject value
 				$data['inputs']['subject']['value'] = $subj;

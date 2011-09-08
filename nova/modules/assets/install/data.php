@@ -6,7 +6,6 @@
  * @category	Install
  * @author		Anodyne Productions
  * @copyright	2011 Anodyne Productions
- * @version		2.0
  */
 
 /*
@@ -733,7 +732,8 @@ $manifests = array(
 		'manifest_header_content' => "Update your manifest header content from the manifest management page.",
 		'manifest_order' => 0,
 		'manifest_display' => 'y',
-		'manifest_default' => 'y'),
+		'manifest_default' => 'y',
+		'manifest_view' => "$('tr.active').show();,$('tr.npc').show();"),
 );
 
 $menu_categories = array(
@@ -2274,11 +2274,6 @@ $system_components = array(
 		'comp_version' => '1.5',
 		'comp_desc' => "Lazy is an on-demand jQuery plugin loader, also known as a lazy loader. Instead of downloading all jQuery plugins you might or might not need when the page loads, Lazy downloads the plugins when you actually use them. Lazy is very lightweight, super fast, and smart. Lazy will keep track of all your plugins and dependencies and make sure that they are only downloaded once.",
 		'comp_url' => 'http://www.unwrongest.com/projects/lazy/'),
-	array(
-		'comp_name' => 'Elastic',
-		'comp_version' => '1.6.5',
-		'comp_desc' => "jQuery Elastic is a plugin that makes your textareas grow and shrink to fit its content and was inspired by the auto-growing textareas on Facebook.",
-		'comp_url' => 'http://www.unwrongest.com/projects/elastic/'),
 	array(
 		'comp_name' => 'jQuery Reflection',
 		'comp_version' => '1.0.3',
