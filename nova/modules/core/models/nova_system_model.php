@@ -8,11 +8,11 @@
  * @copyright	2011 Anodyne Productions
  */
 
-abstract class Nova_system_model extends Model {
+abstract class Nova_system_model extends CI_Model {
 
 	public function __construct()
 	{
-		parent::Model();
+		parent::__construct();
 		
 		$this->load->dbutil();
 	}
@@ -538,7 +538,7 @@ abstract class Nova_system_model extends Model {
 		return $query;
 	}
 	
-	public function update_my_links($id = '', $status = 'active', $items = '83')
+	public function update_my_links($id = '', $status = 'active', $items = '84')
 	{
 		$update = array('my_links' => $items);
 		

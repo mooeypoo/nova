@@ -8,7 +8,7 @@
  * @copyright	2011 Anodyne Productions
  */
 
-require_once MODPATH.'core/libraries/Nova_controller_admin'.EXT;
+require_once MODPATH.'core/libraries/Nova_controller_admin.php';
 
 abstract class Nova_characters extends Nova_controller_admin {
 	
@@ -171,14 +171,18 @@ abstract class Nova_characters extends Nova_controller_admin {
 						// grab the info about the position
 						$pos = $this->pos->get_position($c_update['position_1']);
 						
-						// set the proper number of open slots
-						$open = ($pos->pos_open > 0) ? $pos->pos_open - 1 : 0;
-						
-						// make sure we're setting the new pos_open field
-						$position_update = array('pos_open' => $open);
-						
-						// update the number of open slots for the position
-						$pos_update = $this->pos->update_position($c_update['position_1'], $position_update);
+						// only update the slots if there's a legit position
+						if ($pos !== false)
+						{
+							// set the proper number of open slots
+							$open = ($pos->pos_open > 0) ? $pos->pos_open - 1 : 0;
+							
+							// make sure we're setting the new pos_open field
+							$position_update = array('pos_open' => $open);
+							
+							// update the number of open slots for the position
+							$pos_update = $this->pos->update_position($c_update['position_1'], $position_update);
+						}
 						
 						// set the arguments for the message
 						$args = array(
@@ -695,8 +699,8 @@ abstract class Nova_characters extends Nova_controller_admin {
 			'given' => ucfirst(lang('actions_given') .' '. lang('labels_on')),
 			'inactive' => ucwords(lang('status_inactive') .' '. lang('global_characters')),
 			'ic' => ucwords(lang('labels_ic') .' '. lang('global_awards')),
-			'no_awards' => lang('error_no_awards'),
-			'no_awards_to_give' => lang('error_no_awards_to_give'),
+			'no_awards' => sprintf(lang('error_not_found'), lang('global_awards')),
+			'no_awards_to_give' => sprintf(lang('error_not_found'), lang('global_awards')),
 			'nochars' => ucfirst(lang('labels_no') .' '. lang('global_characters') .' '. lang('labels_to') .' '. lang('labels_display')),
 			'npc' => ucwords(lang('status_nonplaying') .' '. lang('global_characters')),
 			'ooc' => ucwords(lang('labels_ooc') .' '. lang('global_awards')),
@@ -1523,7 +1527,7 @@ abstract class Nova_characters extends Nova_controller_admin {
 			}
 			
 			// create the fields in the data table
-			$create = $this->char->create_character_data_fields($cid, null);
+			$create = $this->char->create_character_data_fields($cid);
 			
 			foreach ($array['fields'] as $k => $v)
 			{
@@ -2054,7 +2058,7 @@ abstract class Nova_characters extends Nova_controller_admin {
 				
 				$em_loc = Location::email('character_action', $this->email->mailtype);
 				
-				$message = $this->parser->parse($em_loc, $email_data, true);
+				$message = $this->parser->parse_string($em_loc, $email_data, true);
 				
 				$this->email->from($data['email'], $data['name']);
 				$this->email->to($data['email']);
@@ -2074,7 +2078,7 @@ abstract class Nova_characters extends Nova_controller_admin {
 				
 				$em_loc = Location::email('character_action', $this->email->mailtype);
 				
-				$message = $this->parser->parse($em_loc, $email_data, true);
+				$message = $this->parser->parse_string($em_loc, $email_data, true);
 				
 				$this->email->from($data['email'], $data['name']);
 				$this->email->to($data['email']);
@@ -2160,7 +2164,7 @@ abstract class Nova_characters extends Nova_controller_admin {
 				$em_loc = Location::email('main_join_gm', $this->email->mailtype);
 				
 				// parse the message
-				$message = $this->parser->parse($em_loc, $email_data, true);
+				$message = $this->parser->parse_string($em_loc, $email_data, true);
 				
 				// get the game masters email addresses
 				$gm = $this->user->get_gm_emails();

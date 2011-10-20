@@ -8,7 +8,7 @@
  * @copyright	2011 Anodyne Productions
  */
 
-abstract class Nova_login extends Controller {
+abstract class Nova_login extends CI_Controller {
 	
 	/**
 	 * @var	array 	The options array that stores all the settings from the database
@@ -39,7 +39,10 @@ abstract class Nova_login extends Controller {
 	{
 		parent::__construct();
 		
-		if ( ! file_exists(APPPATH.'config/database'.EXT))
+		// load the nova core module
+		$this->load->module('core', 'nova', MODPATH);
+		
+		if ( ! file_exists(APPPATH.'config/database.php'))
 		{
 			redirect('install/setupconfig');
 		}
@@ -314,52 +317,60 @@ abstract class Nova_login extends Controller {
 			$question = $this->input->post('question', true);
 			$answer = $this->input->post('answer', true);
 			
-			$info = $this->user->get_user_details_by_email($email);
-			
-			if ($info->num_rows() == 1)
+			if ($question == "0")
 			{
-				// grab the row info
-				$row = $info->row();
+				$flash['status'] = 'error';
+				$flash['message'] = lang_output('flash_reset_no_question');
+			}
+			else
+			{
+				$info = $this->user->get_user_details_by_email($email);
 				
-				if ($row->security_question == $question)
+				if ($info->num_rows() == 1)
 				{
-					if (sha1($answer) == $row->security_answer)
+					// grab the row info
+					$row = $info->row();
+					
+					if ($row->security_question == $question)
 					{
-						// execute the reset and send the email
-						$reset = $this->_reset($email);
-						
-						if ($reset == 0)
+						if (sha1($answer) == $row->security_answer)
 						{
-							$flash['status'] = 'error';
-							$flash['message'] = lang_output('flash_reset_fail');
+							// execute the reset and send the email
+							$reset = $this->_reset($email);
+							
+							if ($reset == 0)
+							{
+								$flash['status'] = 'error';
+								$flash['message'] = lang_output('flash_reset_fail');
+							}
+							else
+							{
+								$flash['status'] = 'success';
+								$flash['message'] = lang_output('flash_reset_success');
+							}
 						}
 						else
 						{
-							$flash['status'] = 'success';
-							$flash['message'] = lang_output('flash_reset_success');
+							$flash['status'] = 'error';
+							$flash['message'] = lang_output('flash_reset_error_3');
 						}
 					}
 					else
 					{
 						$flash['status'] = 'error';
-						$flash['message'] = lang_output('flash_reset_error_3');
+						$flash['message'] = lang_output('flash_reset_error_2');
 					}
 				}
-				else
+				elseif ($info->num_rows() > 1)
 				{
 					$flash['status'] = 'error';
-					$flash['message'] = lang_output('flash_reset_error_2');
+					$flash['message'] = lang_output('flash_reset_error_4');
 				}
-			}
-			elseif ($info->num_rows() > 1)
-			{
-				$flash['status'] = 'error';
-				$flash['message'] = lang_output('flash_reset_error_4');
-			}
-			elseif ($info->num_rows() < 1)
-			{
-				$flash['status'] = 'error';
-				$flash['message'] = lang_output('flash_reset_error_1');
+				elseif ($info->num_rows() < 1)
+				{
+					$flash['status'] = 'error';
+					$flash['message'] = lang_output('flash_reset_error_1');
+				}
 			}
 			
 			$this->_regions['flash_message'] = Location::view('flash', $this->skin, 'login', $flash);
@@ -445,7 +456,7 @@ abstract class Nova_login extends Controller {
 				$em_loc = Location::email('reset_password', $this->email->mailtype);
 				
 				// parse the message
-				$message = $this->parser->parse($em_loc, $email_data, true);
+				$message = $this->parser->parse_string($em_loc, $email_data, true);
 				
 				// set the parameters for sending the email
 				$this->email->from($data['email'], $data['name']);

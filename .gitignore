@@ -7,6 +7,7 @@ application/assets/images/specs/
 application/assets/images/tour/
 application/cache/
 application/logs/
+application/modules/
 application/views/
 
 application/config/database.php
@@ -15,8 +16,7 @@ application/config/database.php
 !application/views/titan/*
 !application/views/_base_override/*
 
-application/assets/common/ds9/
-application/assets/common/ent/
+application/assets/common/*
 
 nova/app/
 

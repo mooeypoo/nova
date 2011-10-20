@@ -17,6 +17,10 @@ Anodyne Production's next-generation RPG management system combines popular feat
 * added the ability for someone with level 2 admin rights to reset someone's password (the new password will be emailed to the user and they'll be prompted to reset the password the next time they log in)
 * added the jQuery Chosen plugin for easier selection of mission post and private message authors (IE 8 and higher, all other browsers)
 * added post locking to prevent changes from being overwritten while users are working on joint posts
+* added the ability to show latest personal logs and missions posts on the main page (admins can select any combination of news, logs and posts)
+* added the ability to set top open positions (from position management) that will be shown at the top of each manifest
+* added some of the Bootstrap by Twitter (version 1.3) CSS and JS components (Twipsy and Popover)
+* added a rules page to the main section
 * updated seamless substitution to be able to override email view files
 * updated Thresher with a new way to create and manage categories when working on a wiki page
 * updated Thresher with a completely new user experience for managing wiki pages
@@ -24,11 +28,11 @@ Anodyne Production's next-generation RPG management system combines popular feat
 * updated the upload instructions to include the maximum file size and maximum image dimensions from the config file for reference
 * updated the deck listing page (sim/decks) to not use a table which makes for a much cleaner layout
 * updated the deck listing page (sim/decks) to have a menu of decks for quickly moving to a deck item without having to scroll (handy for sim with lots of decks)
-* updated to jquery version 1.6.2
-* updated to jquery version 1.8.15
+* updated to codeigniter 2.0.3
+* updated to jquery version 1.6.4
+* updated to jquery version 1.8.16
 * updated to uniform version 1.7.5
 * updated to prettyPhoto version 3.1.2
-* updated to qTip2
 * updated the database to not use a default value for a character's rank to avoid confusion when dealing with pending characters
 * updated the UI for listing mission groups to provide more information and look a lot better
 * updated the missions model to allow group missions to be pulled from the get_all_missions method
@@ -49,10 +53,12 @@ Anodyne Production's next-generation RPG management system combines popular feat
 * updated the view character posts page to use pagination
 * updated the view character logs page to use pagination
 * updated the site manifests to store the default view for a manifest instead of site settings
+* updated the Pulsar skin with a refreshed look and feel
 * refactored the location helper into a full-blown class with static methods
 * refactored the upgrade process to mirror what was created for nova 3
 * removed the banned.php file
 * removed the rss model since it isn't necessary any more
+* removed the qtip plugin
 * fixed bug with seamless substitution of images where they wouldn't work when they were in the _base_override directory
 * fixed bug with private messages where RE: and FWD: would constantly be added to message, now Nova will make sure it's only added once
 * fixed bug with private messages where the person sending the message would be on the recipient list, so any message they sent would show up in their inbox as well
@@ -60,6 +66,7 @@ Anodyne Production's next-generation RPG management system combines popular feat
 * fixed bug where users who were deactivated kept their account flags (sysadmin, game master, etc.) and their access role
 * fixed bug where users who were reactivated didn't have their access role set to Standard User
 * fixed bug where inactive users were shown a link to upload an image even though they don't have permissions to upload images
+* fixed bug where password could be reset for a user if they didn't have a security question chosen
 * fixed several potential security issues
 * fixed bug where positions weren't properly updated when deleting an active character
 * fixed some Pulsar styling issues in IE9

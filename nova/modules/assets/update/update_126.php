@@ -210,7 +210,13 @@ $add_column = array(
 	'manifests' => array(
 		'manifest_view' => array(
 			'type' => 'TEXT'),
-	)
+	),
+	'positions_'.GENRE => array(
+		'pos_top_open' => array(
+			'type' => 'ENUM',
+			'constraint' => "'y','n'",
+			'default' => 'n')
+	),
 );
 
 if ($add_column !== null)
@@ -242,7 +248,14 @@ $modify_column = array(
 			'type' => 'INT',
 			'constraint' => 10,
 			'default' => NULL)
-	)
+	),
+	'sessions' => array(
+		'user_agent' => array(
+			'name' => 'user_agent',
+			'type' => 'VARCHAR',
+			'constraint' => 120,
+			'default' => '')
+	),
 );
 
 if ($modify_column !== null)
@@ -272,8 +285,32 @@ if ($drop_column !== null)
 }
 
 /**
+ * Create the sessions index
+ */
+$sess_table = $this->db->dbprefix('sessions');
+$this->db->query("CREATE INDEX last_activity_idx ON $sess_table(last_activity)");
+
+/**
+ * Add the new settings fields
+ */
+$this->db->insert('settings', array(
+	'setting_key' => 'show_logs',
+	'setting_value' => 'y',
+	'setting_user_created' => 'n'
+));
+$this->db->insert('settings', array(
+	'setting_key' => 'show_posts',
+	'setting_value' => 'y',
+	'setting_user_created' => 'n'
+));
+
+/**
  * Data to insert/update/delete
  */
+
+// update the CI version info
+$this->db->where('comp_name', 'CodeIgniter');
+$this->db->update('system_components', array('comp_version' => '2.0.3'));
 
 // update the lazy version info
 $this->db->where('comp_name', 'Lazy');
@@ -281,11 +318,11 @@ $this->db->update('system_components', array('comp_version' => '1.5'));
 
 // update the jquery version info
 $this->db->where('comp_name', 'jQuery');
-$this->db->update('system_components', array('comp_version' => '1.6.2'));
+$this->db->update('system_components', array('comp_version' => '1.6.4'));
 
 // update the jquery ui version info
 $this->db->where('comp_name', 'jQuery UI');
-$this->db->update('system_components', array('comp_version' => '1.8.15'));
+$this->db->update('system_components', array('comp_version' => '1.8.16'));
 
 // update the jquery prettyphoto info
 $this->db->where('comp_name', 'prettyPhoto');
@@ -319,6 +356,27 @@ $additem = array(
 	'setting_user_created' => 'n'
 );
 $this->db->insert('settings', $additem);
+
+// add the rules menu item
+$menu = array(
+	'menu_name' => 'Rules',
+	'menu_group' => 0,
+	'menu_order' => 10,
+	'menu_link' => 'main/rules',
+	'menu_sim_type' => 1,
+	'menu_type' => 'sub',
+	'menu_cat' => 'main'
+);
+$this->db->insert('menu_items', $menu);
+
+// add the rules message
+$msg = array(
+	'message_key' => 'rules',
+	'message_label' => 'Rules Message',
+	'message_content' => "Define your sim's rules through the Site Messages page.",
+	'message_type' => 'message'
+);
+$this->db->insert('messages', $msg);
 
 // update the level 3 wiki page item
 $this->db->where('page_url', 'wiki/page');
@@ -443,4 +501,36 @@ foreach ($data as $key => $value)
 	// update the draft record
 	$this->db->where('draft_id', $draftID);
 	$this->db->update('wiki_drafts', array('draft_page' => $pageID));
+}
+
+/**
+ * need to take in to account that some sims may have
+ * more than one genre installed, so we need to do the
+ * positions table update for all the genres so that
+ * nova doesn't break in the even they change their genre
+ */
+
+// get all the tables
+$tables = $this->db->list_tables();
+
+// grab the db table prefix
+$prefix = $this->db->dbprefix;
+
+// count the characters in the prefix and add "positions_" to it
+$prefixChars = strlen($prefix);
+$totalChars = $prefixChars + 10;
+
+foreach ($tables as $key => $value)
+{
+	if (substr($value, 0, $totalChars) == $prefix.'positions_' and $value != $prefix.'positions_'.GENRE)
+	{
+		// the key used for the add column array
+		$t = 'positions_'.GENRE;
+		
+		// the table name minus the prefix
+		$table = str_replace($prefix, '', $value);
+		
+		// add the column to all of the department tables
+		$this->dbforge->add_column($table, $add_column[$t]);
+	}
 }

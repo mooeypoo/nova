@@ -8,7 +8,7 @@
  * @copyright	2011 Anodyne Productions
  */
 
-require_once MODPATH.'core/libraries/Nova_controller_admin'.EXT;
+require_once MODPATH.'core/libraries/Nova_controller_admin.php';
 
 abstract class Nova_manage extends Nova_controller_admin {
 	
@@ -3035,6 +3035,7 @@ abstract class Nova_manage extends Nova_controller_admin {
 		// load the resources
 		$this->load->model('positions_model', 'pos');
 		$this->load->model('depts_model', 'dept');
+		$this->load->library('parser');
 		
 		// set the variables
 		$g_dept = $this->uri->segment(3, 1, true);
@@ -3052,6 +3053,7 @@ abstract class Nova_manage extends Nova_controller_admin {
 						'pos_display' => $this->input->post('pos_display', true),
 						'pos_open' => $this->input->post('pos_open', true),
 						'pos_desc' => $this->input->post('pos_desc', true),
+						'pos_top_open' => $this->input->post('pos_top_open', true),
 					);
 					
 					// insert the record
@@ -3146,7 +3148,7 @@ abstract class Nova_manage extends Nova_controller_admin {
 		}
 		
 		// get the positions for the current department
-		$positions = $this->pos->get_dept_positions($g_dept, null);
+		$positions = $this->pos->get_dept_positions($g_dept, '');
 		
 		// get all the departments
 		$departments = $this->dept->get_all_depts('asc', null);
@@ -3160,7 +3162,10 @@ abstract class Nova_manage extends Nova_controller_admin {
 					: ucwords(lang('labels_unassigned').' '.lang('global_departments'));
 					
 				$data['depts'][$d->dept_manifest]['name'] = $name;
-				$data['depts'][$d->dept_manifest]['items'][$d->dept_id] = $d->dept_name;
+				$data['depts'][$d->dept_manifest]['items'][$d->dept_id] = array(
+					'name' => $d->dept_name,
+					'desc' => $d->dept_desc,
+				);
 				
 				$data['deptnames'][$d->dept_id] = $d->dept_name;
 				
@@ -3187,42 +3192,72 @@ abstract class Nova_manage extends Nova_controller_admin {
 						'id' => $p->pos_id .'_name',
 						'value' => $p->pos_name
 					),
-					'desc' => array(
-						'name' => $p->pos_id .'_desc',
-						'id' => $p->pos_id .'_desc',
-						'value' => $p->pos_desc,
-						'rows' => 4
-					),
-					'order' => array(
-						'name' => $p->pos_id .'_order',
-						'id' => $p->pos_id .'_order',
-						'value' => $p->pos_order,
-						'class' => 'small'
-					),
 					'delete' => array(
 						'name' => 'delete[]',
 						'id' => $p->pos_id .'_id',
 						'value' => $p->pos_id
-					)
+					),
 				);
 				
-				$data['values']['position'][$p->pos_id]['display'] = array(
+				$additional_data = array(
+					'id' => $p->pos_id,
+					'dept' => $p->pos_dept,
+					'desc' => array(
+						'name' => 'desc',
+						'id' => $p->pos_id.'_desc',
+						'value' => $p->pos_desc,
+						'rows' => 4
+					),
+					'display' => $p->pos_display,
+					'display_options' => array(
+						'y' => ucwords(lang('labels_yes')),
+						'n' => ucwords(lang('labels_no')),
+					),
+					'order' => array(
+						'name' => 'order',
+						'id' => $p->pos_id.'_order',
+						'value' => $p->pos_order,
+						'class' => 'small'
+					),
+					'type' => $p->pos_type,
+					'type_options' => array(
+						'senior' => ucwords(lang('labels_senior')),
+						'officer' => ucwords(lang('labels_officer')),
+						'enlisted' => ucwords(lang('labels_enlisted')),
+						'other' => ucwords(lang('labels_other')),
+					),
+					'submit' => array(
+						'type' => 'submit',
+						'class' => 'button-main',
+						'name' => 'additional',
+						'id' => $p->pos_id,
+						'value' => 'submit',
+						'content' => ucwords(lang('actions_submit'))
+					),
+					'label' => array(
+						'dept' => ucfirst(lang('global_department')),
+						'desc' => ucfirst(lang('labels_desc')),
+						'display' => ucfirst(lang('labels_display')),
+						'order' => ucfirst(lang('labels_order')),
+						'type' => ucfirst(lang('labels_type')),
+					),
+				);
+				
+				// the additional information view
+				$loc = Location::view('manage_positions_additional', $this->skin, 'admin', $additional_data);
+				
+				// parse the content and make sure it uses single quotes
+				$data['additional'][$p->pos_id] = str_replace('"', "'", $this->parser->parse_string($loc, $additional_data, true));
+				
+				$data['values']['top_open'] = array(
 					'y' => ucwords(lang('labels_yes')),
 					'n' => ucwords(lang('labels_no')),
 				);
 				
-				$data['values']['position'][$p->pos_id]['type'] = array(
-					'senior' => ucwords(lang('labels_senior')),
-					'officer' => ucwords(lang('labels_officer')),
-					'enlisted' => ucwords(lang('labels_enlisted')),
-					'other' => ucwords(lang('labels_other')),
-				);
-				
 				$data['positions'][$p->pos_id]['id'] = $p->pos_id;
+				$data['positions'][$p->pos_id]['name'] = $p->pos_name;
 				$data['positions'][$p->pos_id]['open'] = $p->pos_open;
-				$data['positions'][$p->pos_id]['display'] = $p->pos_display;
-				$data['positions'][$p->pos_id]['dept'] = $p->pos_dept;
-				$data['positions'][$p->pos_id]['type'] = $p->pos_type;
+				$data['positions'][$p->pos_id]['top_open'] = $p->pos_top_open;
 			}
 		}
 				
@@ -3238,18 +3273,13 @@ abstract class Nova_manage extends Nova_controller_admin {
 		$data['g_dept'] = $g_dept;
 		
 		$data['label'] = array(
-			'add_position' => ucwords(lang('actions_add') .' '.
-				lang('global_position') .' '. RARROW),
+			'add_position' => ucwords(lang('actions_add').' '.lang('global_position') .' '. RARROW),
 			'name' => ucfirst(lang('labels_name')),
 			'open' => ucwords(lang('status_open') .' '. lang('labels_slots')),
 			'delete' => ucfirst(lang('actions_delete')),
-			'order' => ucfirst(lang('labels_order')),
-			'display' => ucfirst(lang('labels_display')),
-			'type' => ucfirst(lang('labels_type')),
-			'desc' => ucfirst(lang('labels_desc')),
-			'dept' => ucfirst(lang('global_department')),
 			'depts' => ucfirst(lang('global_departments')),
-			'more' => ucfirst(lang('labels_more'))
+			'more' => ucfirst(lang('labels_more')),
+			'top_open' => ucwords(lang('labels_top').' '.lang('status_open').' '.lang('global_position')),
 		);
 		
 		$data['images'] = array(
@@ -3268,8 +3298,15 @@ abstract class Nova_manage extends Nova_controller_admin {
 				'content' => ucwords(lang('actions_update')))
 		);
 		
+		$js_data['position_update_text'] = sprintf(
+			lang('flash_success'),
+			ucfirst(lang('global_position')),
+			lang('actions_updated'),
+			''
+		);
+		
 		$this->_regions['content'] = Location::view('manage_positions', $this->skin, 'admin', $data);
-		$this->_regions['javascript'] = Location::js('manage_positions_js', $this->skin, 'admin');
+		$this->_regions['javascript'] = Location::js('manage_positions_js', $this->skin, 'admin', $js_data);
 		$this->_regions['title'].= $data['header'];
 		
 		Template::assign($this->_regions);
@@ -4814,7 +4851,6 @@ abstract class Nova_manage extends Nova_controller_admin {
 	{
 		// load the resources
 		$this->load->library('pagination');
-		$this->load->library('parser');
 		$this->load->helper('text');
 		
 		switch ($type)
@@ -5038,10 +5074,7 @@ abstract class Nova_manage extends Nova_controller_admin {
 	    );
 	    
 	    // figure out where the view is coming from
-	    $loc = Location::view('manage_comments_ajax', $this->skin, 'admin');
-	    
-	    // parse the message
-		$message = $this->parser->parse($loc, $data, true);
+	    $message = Location::view('manage_comments_ajax', $this->skin, 'admin', $data);
 
 	    return $message;
 	}
@@ -5080,7 +5113,7 @@ abstract class Nova_manage extends Nova_controller_admin {
 				$em_loc = Location::email('write_newsitem', $this->email->mailtype);
 				
 				// parse the message
-				$message = $this->parser->parse($em_loc, $email_data, true);
+				$message = $this->parser->parse_string($em_loc, $email_data, true);
 				
 				// get the email addresses
 				$emails = $this->user->get_crew_emails(true, 'email_news_items');
@@ -5118,7 +5151,7 @@ abstract class Nova_manage extends Nova_controller_admin {
 				$em_loc = Location::email('write_personallog', $this->email->mailtype);
 				
 				// parse the message
-				$message = $this->parser->parse($em_loc, $email_data, true);
+				$message = $this->parser->parse_string($em_loc, $email_data, true);
 				
 				// get the email addresses
 				$emails = $this->user->get_crew_emails(true, 'email_personal_logs');
@@ -5176,7 +5209,7 @@ abstract class Nova_manage extends Nova_controller_admin {
 				$em_loc = Location::email('write_missionpost', $this->email->mailtype);
 				
 				// parse the message
-				$message = $this->parser->parse($em_loc, $email_data, true);
+				$message = $this->parser->parse_string($em_loc, $email_data, true);
 				
 				// get the email addresses
 				$emails = $this->user->get_crew_emails(true, 'email_mission_posts');
@@ -5219,7 +5252,7 @@ abstract class Nova_manage extends Nova_controller_admin {
 				$em_loc = Location::email('sim_log_comment', $this->email->mailtype);
 				
 				// parse the message
-				$message = $this->parser->parse($em_loc, $email_data, true);
+				$message = $this->parser->parse_string($em_loc, $email_data, true);
 				
 				// set the parameters for sending the email
 				$this->email->from($from, $name);
@@ -5256,7 +5289,7 @@ abstract class Nova_manage extends Nova_controller_admin {
 				$em_loc = Location::email('main_news_comment', $this->email->mailtype);
 				
 				// parse the message
-				$message = $this->parser->parse($em_loc, $email_data, true);
+				$message = $this->parser->parse_string($em_loc, $email_data, true);
 				
 				// set the parameters for sending the email
 				$this->email->from($from, $name);
@@ -5303,7 +5336,7 @@ abstract class Nova_manage extends Nova_controller_admin {
 				
 				$em_loc = Location::email('sim_post_comment', $this->email->mailtype);
 				
-				$message = $this->parser->parse($em_loc, $email_data, true);
+				$message = $this->parser->parse_string($em_loc, $email_data, true);
 				
 				$this->email->from($from, $name);
 				$this->email->to($to);
@@ -5355,7 +5388,7 @@ abstract class Nova_manage extends Nova_controller_admin {
 				$em_loc = Location::email('wiki_comment', $this->email->mailtype);
 				
 				// parse the message
-				$message = $this->parser->parse($em_loc, $email_data, true);
+				$message = $this->parser->parse_string($em_loc, $email_data, true);
 				
 				// set the parameters for sending the email
 				$this->email->from($from, $name);
@@ -5375,7 +5408,7 @@ abstract class Nova_manage extends Nova_controller_admin {
 				
 				$em_loc = Location::email('docked_action', $this->email->mailtype);
 				
-				$message = $this->parser->parse($em_loc, $email_data, true);
+				$message = $this->parser->parse_string($em_loc, $email_data, true);
 				
 				$this->email->from($this->options['default_email_address'], $this->options['sim_name']);
 				$this->email->to($data['email']);
@@ -5395,7 +5428,7 @@ abstract class Nova_manage extends Nova_controller_admin {
 				
 				$em_loc = Location::email('docked_action', $this->email->mailtype);
 				
-				$message = $this->parser->parse($em_loc, $email_data, true);
+				$message = $this->parser->parse_string($em_loc, $email_data, true);
 				
 				$this->email->from($this->options['default_email_address'], $this->options['sim_name']);
 				$this->email->to($data['email']);
@@ -5415,7 +5448,6 @@ abstract class Nova_manage extends Nova_controller_admin {
 	{
 		// load the resources
 		$this->load->library('pagination');
-		$this->load->library('parser');
 		
 		switch ($section)
 		{
@@ -5513,7 +5545,7 @@ abstract class Nova_manage extends Nova_controller_admin {
 			    );
 				
 				// figure out where the view is coming from
-	    		$loc = Location::view('manage_posts_ajax', $this->skin, 'admin');
+	    		$loc = 'manage_posts_ajax';
 			break;
 				
 			case 'logs':
@@ -5591,7 +5623,7 @@ abstract class Nova_manage extends Nova_controller_admin {
 			    );
 				
 				// figure out where the view is coming from
-	    		$loc = Location::view('manage_logs_ajax', $this->skin, 'admin');
+	    		$loc = 'manage_logs_ajax';
 	    	break;
 				
 			case 'news':
@@ -5673,7 +5705,7 @@ abstract class Nova_manage extends Nova_controller_admin {
 			    );
 				
 				// figure out where the view is coming from
-	    		$loc = Location::view('manage_news_ajax', $this->skin, 'admin');
+	    		$loc = 'manage_news_ajax';
 			break;
 		}
 		
@@ -5694,7 +5726,7 @@ abstract class Nova_manage extends Nova_controller_admin {
 	    );
 	    
 	    // parse the message
-		$message = $this->parser->parse($loc, $data, true);
+		$message = Location::view($loc, $this->skin, 'admin', $data);
 
 	    return $message;
 	}

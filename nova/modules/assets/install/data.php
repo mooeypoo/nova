@@ -8,6 +8,12 @@
  * @copyright	2011 Anodyne Productions
  */
 
+/**
+ * Create the sessions index
+ */
+$sess_table = $this->db->dbprefix('sessions');
+$this->db->query("CREATE INDEX last_activity_idx ON $sess_table(last_activity)");
+
 /*
 |---------------------------------------------------------------
 | Data array with the table/array names being used.
@@ -845,7 +851,7 @@ $menu_items = array(
 		'menu_cat' => 'main',
 		'menu_need_login' => 'y'),
 	array(
-		'menu_name' => 'Login',
+		'menu_name' => 'Log In',
 		'menu_group' => 0,
 		'menu_order' => 6,
 		'menu_link' => 'login/index',
@@ -853,7 +859,7 @@ $menu_items = array(
 		'menu_cat' => 'main',
 		'menu_need_login' => 'n'),
 	array(
-		'menu_name' => 'Logout',
+		'menu_name' => 'Log Out',
 		'menu_group' => 0,
 		'menu_order' => 7,
 		'menu_link' => 'login/logout',
@@ -902,9 +908,17 @@ $menu_items = array(
 		'menu_type' => 'sub',
 		'menu_cat' => 'main'),
 	array(
-		'menu_name' => 'Search',
+		'menu_name' => 'Rules',
 		'menu_group' => 0,
 		'menu_order' => 5,
+		'menu_link' => 'main/rules',
+		'menu_sim_type' => 1,
+		'menu_type' => 'sub',
+		'menu_cat' => 'main'),
+	array(
+		'menu_name' => 'Search',
+		'menu_group' => 0,
+		'menu_order' => 6,
 		'menu_link' => 'search/index',
 		'menu_sim_type' => 1,
 		'menu_type' => 'sub',
@@ -1725,6 +1739,11 @@ $messages = array(
 		'message_content' => "Define your welcome message and welcome page header through the Site Messages page.",
 		'message_type' => 'message'),
 	array(
+		'message_key' => 'rules',
+		'message_label' => 'Rules Message',
+		'message_content' => "Define your sim's rules through the Site Messages page.",
+		'message_type' => 'message'),
+	array(
 		'message_key' => 'sim',
 		'message_label' => 'Sim Message',
 		'message_content' => "Define your sim message through the Site Messages page.",
@@ -1949,6 +1968,14 @@ $settings = array(
 		'setting_user_created' => 'n'),
 	array(
 		'setting_key' => 'show_news',
+		'setting_value' => 'y',
+		'setting_user_created' => 'n'),
+	array(
+		'setting_key' => 'show_logs',
+		'setting_value' => 'y',
+		'setting_user_created' => 'n'),
+	array(
+		'setting_key' => 'show_posts',
 		'setting_value' => 'y',
 		'setting_user_created' => 'n'),
 	array(
@@ -2226,7 +2253,7 @@ $specs_sections = array(
 $system_components = array(
 	array(
 		'comp_name' => 'CodeIgniter',
-		'comp_version' => '1.7.3',
+		'comp_version' => '2.0.3',
 		'comp_url' => 'http://codeigniter.com/',
 		'comp_desc' => 'CodeIgniter is an open source web application framework for use in building dynamic web sites with PHP. It enables developers to build applications faster - compared to coding from scratch - by providing a rich set of libraries for commonly needed tasks, as well as a simple interface and a logical structure to access these libraries.'),
 	array(
@@ -2241,12 +2268,12 @@ $system_components = array(
 		'comp_url' => 'http://www.williamsconcepts.com/ci/codeigniter/libraries/template/index.html'),
 	array(
 		'comp_name' => 'jQuery',
-		'comp_version' => '1.6.2',
+		'comp_version' => '1.6.4',
 		'comp_url' => 'http://www.jquery.com/',
 		'comp_desc' => 'jQuery is a lightweight JavaScript library that emphasizes interaction between JavaScript and HTML.'),
 	array(
 		'comp_name' => 'jQuery UI',
-		'comp_version' => '1.8.15',
+		'comp_version' => '1.8.16',
 		'comp_url' => 'http://jqueryui.com/',
 		'comp_desc' => 'jQuery UI is a lightweight, easily customizable interface library for the jQuery Javascript library.'),
 	array(
