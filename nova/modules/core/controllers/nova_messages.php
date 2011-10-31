@@ -23,14 +23,15 @@ abstract class Nova_messages extends Nova_controller_admin {
 		$this->load->library('user_agent');
 	}
 	
-	public function index()
+	public function index($offset = 0)
 	{
 		Auth::check_access();
 		
 		// load the resources
+		$this->load->library('pagination');
 		$this->load->helper('text');
 		
-		if (isset($_POST['inbox']) or isset($_POST['outbox']))
+		if (isset($_POST['inbox']))
 		{
 			if (isset($_POST['inbox']))
 			{
@@ -54,84 +55,34 @@ abstract class Nova_messages extends Nova_controller_admin {
 					}
 				}
 				
-				if ($update_count > 0)
-				{
-					$message = sprintf(
-						lang('flash_success_plural'),
-						ucfirst(lang('global_privatemessages')),
-						lang('actions_removed'),
-						''
-					);
-					
-					$flash['status'] = 'success';
-					$flash['message'] = text_output($message);
-				}
-				else
-				{
-					$message = sprintf(
-						lang('flash_failure_plural'),
-						ucfirst(lang('global_privatemessages')),
-						lang('actions_removed'),
-						''
-					);
-					
-					$flash['status'] = 'error';
-					$flash['message'] = text_output($message);
-				}
-			}
-			
-			if (isset($_POST['outbox']))
-			{
-				$update_count = 0;
+				$message = sprintf(
+					($update_count > 0) ? lang('flash_success_plural') : lang('flash_failure_plural'),
+					ucfirst(lang('global_privatemessages')),
+					lang('actions_removed'),
+					''
+				);
+				$flash['status'] = ($update_count > 0) ? 'success' : 'error';
+				$flash['message'] = text_output($message);
 				
-				foreach ($_POST as $k => $v)
-				{
-					if (substr($k, 0, 7) == 'outbox_')
-					{
-						$update_array = array('privmsgs_author_display' => 'n');
-						
-						$update = $this->pm->update_private_message($v, $update_array);
-						
-						if ($update > 0)
-						{
-							$update_count++;
-						}
-					}
-				}
-				
-				if ($update_count > 0)
-				{
-					$message = sprintf(
-						lang('flash_success_plural'),
-						ucfirst(lang('global_privatemessages')),
-						lang('actions_removed'),
-						''
-					);
-					
-					$flash['status'] = 'success';
-					$flash['message'] = text_output($message);
-				}
-				else
-				{
-					$message = sprintf(
-						lang('flash_failure_plural'),
-						ucfirst(lang('global_privatemessages')),
-						lang('actions_removed'),
-						''
-					);
-					
-					$flash['status'] = 'error';
-					$flash['message'] = text_output($message);
-				}
+				// set the flash message
+				$this->_regions['flash_message'] = Location::view('flash', $this->skin, 'admin', $flash);
 			}
-			
-			// set the flash message
-			$this->_regions['flash_message'] = Location::view('flash', $this->skin, 'admin', $flash);
 		}
 		
-		// run the methods
-		$inbox = $this->pm->get_inbox($this->session->userdata('userid'));
-		$outbox = $this->pm->get_outbox($this->session->userdata('userid'));
+		$config['base_url'] = site_url('messages/index/');
+		$config['total_rows'] = $this->pm->count_pms($this->session->userdata('userid'), 'inbox');
+		$config['per_page'] = 25;
+		$config['full_tag_open'] = '<p class="fontMedium bold">';
+		$config['full_tag_close'] = '</p>';
+	
+		// initialize the pagination library
+		$this->pagination->initialize($config);
+		
+		// create the page links
+		$data['inbox_pagination'] = $this->pagination->create_links();
+		
+		// get the inbox data
+		$inbox = $this->pm->get_inbox($this->session->userdata('userid'), $config['per_page'], $offset);
 		
 		$data['header'] = ucwords(lang('global_privatemessages'));
 		
@@ -143,22 +94,28 @@ abstract class Nova_messages extends Nova_controller_admin {
 			'unread' => array(
 				'src' => Location::img('mail-unread.png', $this->skin, 'admin'),
 				'alt' => '*',
-				'class' => 'image')
+				'class' => 'image'),
+			'clock' => array(
+				'src' => Location::img('clock.png', $this->skin, 'admin'),
+				'alt' => '*',
+				'class' => 'image inline_img_left'),
+			'user' => array(
+				'src' => Location::img('user.png', $this->skin, 'admin'),
+				'alt' => '*',
+				'class' => 'image inline_img_left'),
+			'preview' => array(
+				'src' => Location::img('magnifier-medium.png', $this->skin, 'admin'),
+				'alt' => '[?]',
+				'class' => 'image'),
 		);
 		
 		$data['button'] = array(
 			'inbox' => array(
 				'type' => 'submit',
-				'class' => 'button-main float_right',
+				'class' => 'button-sec',
 				'name' => 'inbox',
 				'value' => 'remove',
 				'content' => ucwords(lang('actions_remove'))),
-			'outbox' => array(
-				'type' => 'submit',
-				'class' => 'button-main float_right',
-				'name' => 'outbox',
-				'value' => 'remove',
-				'content' => ucwords(lang('actions_remove')))
 		);
 		
 		if ($inbox->num_rows() > 0)
@@ -176,59 +133,16 @@ abstract class Nova_messages extends Nova_controller_admin {
 				$data['inbox'][$item->pmto_id]['id'] = $item->privmsgs_id;
 				$data['inbox'][$item->pmto_id]['author'] = $this->char->get_character_name($item->privmsgs_author_character, true);
 				$data['inbox'][$item->pmto_id]['subject'] = $item->privmsgs_subject;
-				$data['inbox'][$item->pmto_id]['blurb'] = word_limiter($item->privmsgs_content, 15);
 				$data['inbox'][$item->pmto_id]['date'] = mdate($datestring, $date);
 				$data['inbox'][$item->pmto_id]['unread'] = ($item->pmto_unread == 'y') ? img($data['images']['unread']) : false;
+				$data['inbox'][$item->pmto_id]['preview'] = nl2br(htmlspecialchars(strip_tags(word_limiter($item->privmsgs_content, 100))));
 				$data['inbox'][$item->pmto_id]['checkbox'] = array(
 					'name' => 'inbox_'. $item->pmto_id,
 					'value' => $item->pmto_id,
-					'class' => 'inbox'
+					'class' => 'inbox',
 				);
 			}
 		}
-		
-		if ($outbox->num_rows() > 0)
-		{
-			$datestring = $this->options['date_format'];
-			
-			$data['outbox_check_all'] = array(
-				'name' => 'outbox_check_all',
-				'id' => 'outbox_check_all'
-			);
-			
-			foreach ($outbox->result() as $item)
-			{
-				$messages = $this->pm->get_messages_for_id($item->privmsgs_id);
-				
-				if ($messages->num_rows() > 0)
-				{
-					$array = array();
-					
-					foreach ($messages->result() as $msg)
-					{
-						$array[] = $this->char->get_character_name($msg->pmto_recipient_character, true);
-					}
-				}
-				
-				$to = implode(' &amp; ', $array);
-				
-				$date = gmt_to_local($item->privmsgs_date, $this->timezone, $this->dst);
-				
-				// build the data used
-				$data['outbox'][$item->privmsgs_id]['id'] = $item->privmsgs_id;
-				$data['outbox'][$item->privmsgs_id]['to'] = $to;
-				$data['outbox'][$item->privmsgs_id]['subject'] = $item->privmsgs_subject;
-				$data['outbox'][$item->privmsgs_id]['blurb'] = word_limiter($item->privmsgs_content, 15);
-				$data['outbox'][$item->privmsgs_id]['date'] = mdate($datestring, $date);
-				$data['outbox'][$item->privmsgs_id]['checkbox'] = array(
-					'name' => 'outbox_'. $item->privmsgs_id,
-					'value' => $item->privmsgs_id,
-					'class' => 'outbox'
-				);
-			}
-		}
-		
-		$js_data['tab'] = ($this->uri->segment(3) == 'sent') ? 1 : 0;
 		
 		$data['loader'] = array(
 			'src' => Location::img('loading-bar.gif', $this->skin, 'admin'),
@@ -236,19 +150,15 @@ abstract class Nova_messages extends Nova_controller_admin {
 		);
 		
 		$data['label'] = array(
-			'from' => ucfirst(lang('time_from')),
 			'inbox' => ucwords(lang('labels_inbox')),
 			'loading' => ucfirst(lang('actions_loading')) .'...',
+			'message_preview' => ucwords(lang('labels_message').' '.lang('labels_preview')),
 			'no_inbox' => sprintf(lang('error_not_found'), lang('global_privatemessages')),
-			'no_outbox' => sprintf(lang('error_not_found'), lang('actions_sent').' '.lang('global_privatemessages')),
-			'sent' => ucwords(lang('actions_sent') .' '. lang('labels_messages')),			
-			'subject' => ucfirst(lang('labels_subject')),
-			'to' => ucfirst(lang('labels_to')),
 			'write' => ucwords(lang('actions_write') .' '. lang('status_new') .' '. lang('labels_message')),
 		);
 		
 		$this->_regions['content'] = Location::view('messages_index', $this->skin, 'admin', $data);
-		$this->_regions['javascript'] = Location::js('messages_index_js', $this->skin, 'admin', $js_data);
+		$this->_regions['javascript'] = Location::js('messages_index_js', $this->skin, 'admin');
 		$this->_regions['title'].= $data['header'];
 		
 		Template::assign($this->_regions);
@@ -345,6 +255,146 @@ abstract class Nova_messages extends Nova_controller_admin {
 		
 		$this->_regions['content'] = Location::view('messages_read', $this->skin, 'admin', $data);
 		$this->_regions['title'].= $title;
+		
+		Template::assign($this->_regions);
+		
+		Template::render();
+	}
+	
+	public function sent($offset = 0)
+	{
+		Auth::check_access('messages/index');
+		
+		// load the resources
+		$this->load->library('pagination');
+		$this->load->helper('text');
+		
+		if (isset($_POST['outbox']))
+		{
+			$update_count = 0;
+			
+			foreach ($_POST as $k => $v)
+			{
+				if (substr($k, 0, 7) == 'outbox_')
+				{
+					$update_array = array('privmsgs_author_display' => 'n');
+					
+					$update = $this->pm->update_private_message($v, $update_array);
+					
+					if ($update > 0)
+					{
+						$update_count++;
+					}
+				}
+			}
+			
+			$message = sprintf(
+				($update_count > 0) ? lang('flash_success_plural') : lang('flash_failure_plural'),
+				ucfirst(lang('global_privatemessages')),
+				lang('actions_removed'),
+				''
+			);
+			$flash['status'] = ($update_count > 0) ? 'success' : 'error';
+			$flash['message'] = text_output($message);
+			
+			// set the flash message
+			$this->_regions['flash_message'] = Location::view('flash', $this->skin, 'admin', $flash);
+		}
+		
+		$config['base_url'] = site_url('messages/sent/');
+		$config['total_rows'] = $this->pm->count_pms($this->session->userdata('userid'), 'sent');
+		$config['per_page'] = 25;
+		$config['full_tag_open'] = '<p class="fontMedium bold">';
+		$config['full_tag_close'] = '</p>';
+	
+		// initialize the pagination library
+		$this->pagination->initialize($config);
+		
+		// create the page links
+		$data['outbox_pagination'] = $this->pagination->create_links();
+		
+		// get the inbox data
+		$outbox = $this->pm->get_outbox($this->session->userdata('userid'), $config['per_page'], $offset);
+		
+		$data['header'] = ucwords(lang('actions_sent').' '.lang('global_privatemessages'));
+		
+		$data['images'] = array(
+			'write' => array(
+				'src' => Location::img('mail-message-new.png', $this->skin, 'admin'),
+				'alt' => lang('actions_write'),
+				'class' => 'image inline_img_left'),
+			'clock' => array(
+				'src' => Location::img('clock.png', $this->skin, 'admin'),
+				'alt' => '*',
+				'class' => 'image inline_img_left'),
+			'user' => array(
+				'src' => Location::img('user.png', $this->skin, 'admin'),
+				'alt' => '*',
+				'class' => 'image inline_img_left'),
+			'preview' => array(
+				'src' => Location::img('magnifier-medium.png', $this->skin, 'admin'),
+				'alt' => '[?]',
+				'class' => 'image'),
+		);
+		
+		$data['button'] = array(
+			'outbox' => array(
+				'type' => 'submit',
+				'class' => 'button-sec',
+				'name' => 'outbox',
+				'value' => 'remove',
+				'content' => ucwords(lang('actions_remove'))),
+		);
+		
+		if ($outbox->num_rows() > 0)
+		{
+			$datestring = $this->options['date_format'];
+			$data['outbox_check_all'] = array(
+				'name' => 'outbox_check_all',
+				'id' => 'outbox_check_all'
+			);
+			
+			foreach ($outbox->result() as $item)
+			{
+				$date = gmt_to_local($item->privmsgs_date, $this->timezone, $this->dst);
+				
+				// get the chacter IDs
+				$recipients_array = $this->pm->get_message_recipients($item->privmsgs_id, 'character');
+				
+				// make it a string
+				$recipients_string = implode(',', $recipients_array);
+				
+				// get the list of characters
+				$recipients = $this->char->get_authors($recipients_string);
+				
+				$data['outbox'][$item->privmsgs_id]['id'] = $item->privmsgs_id;
+				$data['outbox'][$item->privmsgs_id]['recipients'] = $recipients;
+				$data['outbox'][$item->privmsgs_id]['subject'] = $item->privmsgs_subject;
+				$data['outbox'][$item->privmsgs_id]['date'] = mdate($datestring, $date);
+				$data['outbox'][$item->privmsgs_id]['preview'] = nl2br(htmlspecialchars(strip_tags(word_limiter($item->privmsgs_content, 100))));
+				$data['outbox'][$item->privmsgs_id]['checkbox'] = array(
+					'name' => 'outbox_'. $item->privmsgs_id,
+					'value' => $item->privmsgs_id,
+					'class' => 'outbox',
+				);
+			}
+		}
+		
+		$data['loader'] = array(
+			'src' => Location::img('loading-bar.gif', $this->skin, 'admin'),
+			'alt' => lang('actions_loading'),
+		);
+		
+		$data['label'] = array(
+			'loading' => ucfirst(lang('actions_loading')) .'...',
+			'message_preview' => ucwords(lang('labels_message').' '.lang('labels_preview')),
+			'no_outbox' => sprintf(lang('error_not_found'), lang('global_privatemessages')),
+			'write' => ucwords(lang('actions_write') .' '. lang('status_new') .' '. lang('labels_message')),
+		);
+		
+		$this->_regions['content'] = Location::view('messages_sent', $this->skin, 'admin', $data);
+		$this->_regions['javascript'] = Location::js('messages_sent_js', $this->skin, 'admin');
+		$this->_regions['title'].= $data['header'];
 		
 		Template::assign($this->_regions);
 		

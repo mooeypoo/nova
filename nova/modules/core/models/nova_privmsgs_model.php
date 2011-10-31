@@ -17,13 +17,14 @@ abstract class Nova_privmsgs_model extends CI_Model {
 		$this->load->dbutil();
 	}
 
-	public function get_inbox($id = '')
+	public function get_inbox($id = '', $limit, $offset)
 	{
 		$this->db->from('privmsgs_to');
 		$this->db->join('privmsgs', 'privmsgs.privmsgs_id = privmsgs_to.pmto_message');
 		$this->db->where('pmto_recipient_user', $id);
 		$this->db->where('pmto_display', 'y');
 		$this->db->order_by('privmsgs_date', 'desc');
+		$this->db->limit($limit, $offset);
 		
 		$query = $this->db->get();
 		
@@ -42,7 +43,16 @@ abstract class Nova_privmsgs_model extends CI_Model {
 		return $query;
 	}
 	
-	public function get_message_recipients($id = '')
+	/**
+	 * Get an array of message recipients.
+	 *
+	 * @access	public
+	 * @version	2.0
+	 * @param	int		the message ID
+	 * @param	string	whether to pull back user or character IDs
+	 * @return	array 	an array of IDs (false if there are none)
+	 */
+	public function get_message_recipients($id = '', $return = 'user')
 	{
 		$query = $this->db->get_where('privmsgs_to', array('pmto_message' => $id));
 		
@@ -50,7 +60,7 @@ abstract class Nova_privmsgs_model extends CI_Model {
 		{
 			foreach ($query->result() as $row)
 			{
-				$array[] = $row->pmto_recipient_user;
+				$array[] = ($return == 'user') ? $row->pmto_recipient_user : $row->pmto_recipient_character;
 			}
 			
 			return $array;
@@ -77,14 +87,51 @@ abstract class Nova_privmsgs_model extends CI_Model {
 		return $query;
 	}
 	
-	public function count_unread_pms($id = '')
+	/**
+	 * Count private messages
+	 *
+	 * @access	public
+	 * @since	2.0
+	 * @param	int		the user ID
+	 * @param	string	the inbox, outbox or unread
+	 * @return	int		how many results were found
+	 */
+	public function count_pms($id, $type)
 	{
-		$this->db->from('privmsgs_to');
-		$this->db->where('pmto_recipient_user', $id);
-		$this->db->where('pmto_display', 'y');
-		$this->db->where('pmto_unread', 'y');
+		switch ($type)
+		{
+			case 'inbox':
+				$this->db->from('privmsgs_to');
+				$this->db->where('pmto_recipient_user', $id);
+				$this->db->where('pmto_display', 'y');
+			break;
+			
+			case 'sent':
+				$this->db->from('privmsgs');
+				$this->db->where('privmsgs_author_user', $id);
+				$this->db->where('privmsgs_author_display', 'y');
+			break;
+			
+			case 'unread':
+				$this->db->from('privmsgs_to');
+				$this->db->where('pmto_recipient_user', $id);
+				$this->db->where('pmto_display', 'y');
+				$this->db->where('pmto_unread', 'y');
+			break;
+		}
 		
 		return $this->db->count_all_results();
+	}
+	
+	/**
+	 * Count unread private messages. This is an alias to count_pms.
+	 *
+	 * @deprecated
+	 * @access	public
+	 */
+	public function count_unread_pms($id = '')
+	{
+		return $this->count_pms($id, 'unread');
 	}
 	
 	public function insert_pm_recipients($data = '')

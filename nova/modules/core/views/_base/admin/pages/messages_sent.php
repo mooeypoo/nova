@@ -7,31 +7,31 @@
 <div id="loaded" class="hidden">
 	<p><?php echo anchor('messages/write', img($images['write']).$label['write'], array('class' => 'image bold'));?></p>
 	
-	<?php if ( ! isset($inbox)): ?>
-		<?php echo text_output($label['no_inbox'], 'h3', 'orange');?>
+	<?php if ( ! isset($outbox)): ?>
+		<?php echo text_output($label['no_outbox'], 'h3', 'orange');?>
 	<?php else: ?>
-		<?php echo form_open('messages/index');?>
+		<?php echo form_open('messages/sent');?>
 			
-			<?php echo $inbox_pagination;?>
+			<?php echo $outbox_pagination;?>
 			
 			<table class="table100 zebra">
 				<thead>
 					<tr>
 						<th colspan="2"></th>
-						<th class="col_30 align_middle"><?php echo form_checkbox($inbox_check_all);?></th>
+						<th class="col_30 align_middle"><?php echo form_checkbox($outbox_check_all);?></th>
 					</tr>
 				</thead>
 				<tbody>
-				<?php foreach ($inbox as $item): ?>
+				<?php foreach ($outbox as $item): ?>
 					<tr>
 						<td class="col_5"></td>
 						<td>
 							<h4>
-								<?php echo anchor('messages/read/'. $item['id'], $item['subject']);?>
+								<?php echo anchor('messages/read/'.$item['id'], $item['subject']);?>
 								<a href="#" rel="popover" class="image" title="<?php echo $label['message_preview'];?>" data-content="<?php echo $item['preview'];?>"><?php echo img($images['preview']);?></a>
 							</h4>
 							<p class="gray fontSmall">
-								<?php echo img($images['user']).$item['author'];?><br />
+								<?php echo img($images['user']).$item['recipients'];?><br />
 								<?php echo img($images['clock']).$item['date'];?>
 							</p>
 						</td>
@@ -41,9 +41,9 @@
 				</tbody>
 			</table>
 			
-			<span class="float_right"><br /><?php echo form_button($button['inbox']);?></span>
+			<span class="float_right"><br /><?php echo form_button($button['outbox']);?></span>
 			
-			<?php echo $inbox_pagination;?>
+			<?php echo $outbox_pagination;?>
 			
 			<div class="clear_right"></div>
 		<?php echo form_close();?>

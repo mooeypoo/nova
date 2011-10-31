@@ -13,8 +13,8 @@
 			html: true
 		});
 		
-		$('#inbox_check_all').click(function(){
-			$("input[type='checkbox']").attr('checked', $('#inbox_check_all').is(':checked'));
+		$('#outbox_check_all').click(function(){
+			$("input[type='checkbox']").attr('checked', $('#outbox_check_all').is(':checked'));
 		});
 		
 		$('#loading').hide();
