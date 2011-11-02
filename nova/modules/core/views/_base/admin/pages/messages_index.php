@@ -1,3 +1,5 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');?>
+
 <div class="float_right">
 	<br />
 	<?php echo form_open('messages/search');?>
@@ -35,6 +37,10 @@
 						<td class="col_5"></td>
 						<td>
 							<h4>
+								<?php if ($item['unread']): ?>
+									<?php echo img($images['unread']);?>
+								<?php endif;?>
+								
 								<?php echo anchor('messages/read/'. $item['id'], $item['subject']);?>
 								<a href="#" rel="popover" class="image" title="<?php echo $label['message_preview'];?>" data-content="<?php echo $item['preview'];?>"><?php echo img($images['preview']);?></a>
 							</h4>
