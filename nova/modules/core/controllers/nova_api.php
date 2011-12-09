@@ -30,6 +30,18 @@ abstract class Nova_api extends Nova_REST_Controller {
 	public $_date_format = '%j %M %Y %G:%i';
 	
 	/**
+	 * @var array 	An array of protected methods.
+	 *
+	 * DO NOT CHANGE THIS!
+	 * Changing this array can cause unauthorized users to have access to your
+	 * API and make changes to your site.
+	 */
+	protected $methods = array(
+		'user_get'	=> array('level' => 10, 'limit' => 10),
+		'users_get'	=> array('level' => 10),
+	);
+	
+	/**
 	 * Get information about the API.
 	 *
 	 * @access	public
@@ -645,7 +657,7 @@ abstract class Nova_api extends Nova_REST_Controller {
 	 * @access	private
 	 * @return	object	a response object with content and a response code
 	 */
-	private function user_get()
+	public function user_get()
 	{
 		$this->load->model('characters_model', 'char');
 		$this->load->model('users_model', 'user');
@@ -722,7 +734,7 @@ abstract class Nova_api extends Nova_REST_Controller {
 	 * @access	private
 	 * @return	object	a response object with content and a response code
 	 */
-	private function users_get()
+	public function users_get()
 	{
 		$this->load->model('characters_model', 'char');
 		$this->load->model('users_model', 'user');
