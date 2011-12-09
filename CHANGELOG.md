@@ -40,16 +40,16 @@
 
 ### The Nova Core
 
-* Moved to CodeIgniter 2.0.3 (was previously 1.7.3).
+* Moved to CodeIgniter 2.1 (was previously 1.7.3).
 * Moved to a brand new file structure that further removes the Nova Core from any changes an admin might be making.
 * Added __experimental__ module support.
-* Updated to jQuery 1.7.
+* Updated to jQuery 1.7.1.
 * Updated to jQuery UI 1.8.16.
 * Updated to jQuery Uniform 1.7.5.
-* Updated to jQuery prettyPhoto 3.1.2.
+* Updated to jQuery prettyPhoto 3.1.3.
 * Added the jQuery Chosen plugin.
-* Added the Bootstrap by Twitter Twipsy plugin (version 1.3).
-* Added the Bootstrap by Twitter Popover plugin (version 1.3).
+* Added the Bootstrap by Twitter Twipsy plugin (version 1.4).
+* Added the Bootstrap by Twitter Popover plugin (version 1.4).
 * Removed the qTip plugin. (Please use the Bootstrap Twipsy plugin instead.)
 * Changed the `banned.php` file to `message.php` that now contains notifications of Level 2 bans, a missing `nova` directory and incompatible PHP version information.
 * Seamless substitution can now be used to override email view files from the `_base_override` directory.
@@ -65,6 +65,7 @@
 * The SMS Upgrade process will now migrate SMS Database entries to the Thresher wiki page format.
 * Completely re-wrote the upgrade process to not use config files (admins select the components they want upgraded through a user interface), to show more useful validation messages and be a shorter, more pleasant process (reduced the number of steps from 14 to 4).
 * View files now check for the existence of the BASEPATH constant before rendering. On some servers, random `error_log` files are generated all over the place. A big part of this is view files that are accessed apart from the framework and generate PHP fatal errors. This fix should help eliminate those error log files.
+* In preparation for future deprecation, we've removed all references to jQuery's `.live()` method. Third party developers should ensure their own code is updated as soon as possible to avoid any issues once the method is removed from the jQuery core.
 
 ### Thresher
 
