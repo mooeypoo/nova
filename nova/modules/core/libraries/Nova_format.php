@@ -258,5 +258,4 @@ class Nova_format {
 	{
 		return unserialize(trim($string));
 	}
-
 }

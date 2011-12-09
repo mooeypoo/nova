@@ -11,7 +11,7 @@
  * @package		Nova
  * @category	API
  * @author		Anodyne Productions
- * @copyright	2011 Anodyne Productions
+ * @copyright	2012 Anodyne Productions
  * @version		1.0
  */
  

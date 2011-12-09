@@ -1,5 +1,4 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
-
 /*
 |--------------------------------------------------------------------------
 | REST Format
@@ -22,7 +21,7 @@ $config['rest_default_format'] = 'xml';
 |	Default: false
 |
 */
-$config['enable_emulate_request'] = TRUE;
+$config['enable_emulate_request'] = true;
 
 
 /*
@@ -64,16 +63,13 @@ $config['rest_auth'] = false;
 |			$config['auth_override_class_method']['deals']['insert'] = 'digest';
 |			$config['auth_override_class_method']['accounts']['user'] = 'basic'; 
 |
-| Here 'deals' and 'accounts' are controller names, 'view', 'insert' and 'user' are methods within. 
-| (NOTE: leave off the '_get' or '_post' from the end of the method name)
-| Acceptable values are: 'none', 'digest' and 'basic'.  
+| Here 'deals' and 'accounts' are controller names, 'view', 'insert' and 'user' are methods within. (NOTE: leave off the '_get' or '_post' from the end of the method name)
+| Acceptable values are; 'none', 'digest' and 'basic'.  
 |
 */
 // $config['auth_override_class_method']['deals']['view'] = 'none';
 // $config['auth_override_class_method']['deals']['insert'] = 'digest';
 // $config['auth_override_class_method']['accounts']['user'] = 'basic';
-
-$config['auth_override_class_method']['api']['info_delete'] = 'none';
 
 /*
 |--------------------------------------------------------------------------
@@ -86,6 +82,38 @@ $config['auth_override_class_method']['api']['info_delete'] = 'none';
 |
 */
 $config['rest_valid_logins'] = array('admin' => '1234');
+
+/*
+|--------------------------------------------------------------------------
+| Global IP Whitelisting
+|--------------------------------------------------------------------------
+|
+| Limit connections to your REST server to whitelisted IP addresses.
+|
+| Usage:
+| 1. Set to true *and* select an auth option for extreme security (client's IP
+|	 address must be in whitelist and they must also log in)
+| 2. Set to true with auth set to false to allow whitelisted IPs access with no login.
+| 3. Set to false here but set 'auth_override_class_method' to 'whitelist' to
+|	 restrict certain methods to IPs in your whitelist
+|
+*/
+$config['rest_ip_whitelist_enabled'] = false;
+
+/*
+|--------------------------------------------------------------------------
+| REST IP Whitelist
+|--------------------------------------------------------------------------
+|
+| Limit connections to your REST server to a comma separated
+| list of IP addresses
+|
+| Example: $config['rest_ip_whitelist'] = '123.456.789.0, 987.654.32.1';
+|
+| 127.0.0.1 and 0.0.0.0 are allowed by default.
+|
+*/
+$config['rest_ip_whitelist'] = '';
 
 /*
 |--------------------------------------------------------------------------
@@ -132,7 +160,7 @@ $config['rest_keys_table'] = 'keys';
 	) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 |
 */
-$config['rest_enable_keys'] = FALSE;
+$config['rest_enable_keys'] = false;
 
 /*
 |--------------------------------------------------------------------------
@@ -195,7 +223,7 @@ $config['rest_logs_table'] = 'logs';
 	) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 |
 */
-$config['rest_enable_logging'] = FALSE;
+$config['rest_enable_logging'] = false;
 
 /*
 |--------------------------------------------------------------------------
@@ -230,7 +258,7 @@ $config['rest_limits_table'] = 'limits';
 	) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 |
 */
-$config['rest_enable_limits'] = FALSE;
+$config['rest_enable_limits'] = false;
 
 /*
 |--------------------------------------------------------------------------
@@ -243,7 +271,7 @@ $config['rest_enable_limits'] = FALSE;
 |	FALSE
 |
 */
-$config['rest_ignore_http_accept'] = FALSE;
+$config['rest_ignore_http_accept'] = false;
 
 /*
 |--------------------------------------------------------------------------
@@ -258,4 +286,4 @@ $config['rest_ignore_http_accept'] = FALSE;
 |	FALSE
 |
 */
-$config['rest_ajax_only'] = FALSE;
+$config['rest_ajax_only'] = false;
