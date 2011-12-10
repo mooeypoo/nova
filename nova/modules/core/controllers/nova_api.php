@@ -22,7 +22,7 @@ abstract class Nova_api extends Nova_REST_Controller {
 	/**
 	 * @var	string	The version of the API.
 	 */
-	public $_api_version = '1.0.0';
+	public $_api_version = '1';
 	
 	/**
 	 * @var	string	The date format.
@@ -37,6 +37,7 @@ abstract class Nova_api extends Nova_REST_Controller {
 	 * API and make changes to your site.
 	 */
 	protected $methods = array(
+		'info_get'	=> array('level' => 0),
 		'user_get'	=> array('level' => 10, 'limit' => 10),
 		'users_get'	=> array('level' => 10),
 	);
