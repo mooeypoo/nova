@@ -9,7 +9,7 @@
 |	Default: xml
 |
 */
-$config['rest_default_format'] = 'xml';
+$config['rest_default_format'] = 'json';
 
 /*
 |--------------------------------------------------------------------------
@@ -34,7 +34,7 @@ $config['enable_emulate_request'] = true;
 |	E.g: My Secret REST API
 |
 */
-$config['rest_realm'] = 'REST API';
+$config['rest_realm'] = 'NOVA REST API';
 
 /*
 |--------------------------------------------------------------------------
@@ -46,7 +46,7 @@ $config['rest_realm'] = 'REST API';
 |	'' = no login required, 'basic' = unsecure login, 'digest' = more secure login
 |
 */
-$config['rest_auth'] = false;
+$config['rest_auth'] = '';
 
 /*
 |--------------------------------------------------------------------------
@@ -160,7 +160,7 @@ $config['rest_keys_table'] = 'api_keys';
 	) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 |
 */
-$config['rest_enable_keys'] = true;
+$config['rest_enable_keys'] = false;
 
 /*
 |--------------------------------------------------------------------------
@@ -173,7 +173,7 @@ $config['rest_enable_keys'] = true;
 |	Max: 40
 |
 */
-$config['rest_key_length'] = 4;
+$config['rest_key_length'] = 32;
 
 /*
 |--------------------------------------------------------------------------
