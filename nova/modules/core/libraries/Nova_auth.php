@@ -25,6 +25,26 @@ abstract class Nova_auth {
 		log_message('debug', 'Auth Library Initialized');
 	}
 	
+	/**
+	 * Check the API key to see if it exists in the database.
+	 *
+	 * @access	public
+	 * @since	2.1
+	 * @param	string	the API key to check
+	 * @return	bool	whether the key exists or not
+	 */
+	public static function api_key_check($key)
+	{
+		// get an instance of CI
+		$ci =& get_instance();
+		
+		// load the resources
+		$ci->load->model('users_model', 'user');
+		
+		// check and return the result
+		return $ci->user->find_api_key($key);
+	}
+	
 	public static function check_access($uri = null, $redirect = true, $partial = false)
 	{
 		// get an instance of CI
