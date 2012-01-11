@@ -675,23 +675,17 @@ class REST_Controller extends CI_Controller {
 	{
 		if (empty($username))
 		{
-			return FALSE;
+			return false;
 		}
-
-		$valid_logins = & $this->config->item('rest_valid_logins');
-
-		if (!array_key_exists($username, $valid_logins))
+		
+		$login = Auth::verify($username, $password);
+		
+		if ($login > 0)
 		{
-			return FALSE;
+			return false;
 		}
-
-		// If actually NULL (not empty string) then do not check it
-		if ($password !== NULL AND $valid_logins[$username] != $password)
-		{
-			return FALSE;
-		}
-
-		return TRUE;
+		
+		return true;
 	}
 
 	protected function _prepare_basic_auth()
@@ -721,7 +715,7 @@ class REST_Controller extends CI_Controller {
 			}
 		}
 
-		if (!$this->_check_login($username, $password))
+		if ( ! $this->_check_login($username, $password))
 		{
 			$this->_force_login();
 		}
