@@ -30,17 +30,39 @@ abstract class Nova_api extends Nova_REST_Controller {
 	public $_date_format = '%j %M %Y %G:%i';
 	
 	/**
-	 * @var array 	An array of protected methods.
+	 * The access method checks the incoming variables to see if there's
+	 * an API key and if there are access limits for the API method being
+	 * called.
 	 *
-	 * DO NOT CHANGE THIS!
-	 * Changing this array can cause unauthorized users to have access to your
-	 * API and make changes to your site.
+	 * @access	protected
+	 * @return	void
 	 */
-	protected $methods = array(
-		'info_get'	=> array('level' => 0),
-		'user_get'	=> array('level' => 10, 'limit' => 10),
-		'users_get'	=> array('level' => 10),
-	);
+	protected function _setup()
+	{
+		// the list of methods that are protected
+		$protected_methods = array(
+			'info_post'
+		);
+		
+		// set the method name
+		$method_name = $this->router->fetch_method().'_'.strtolower($this->input->server('REQUEST_METHOD'));
+		
+		// get the api key
+		$api_key = $this->input->get_request_header('Http-X-api-key');
+		
+		// is the current method protected?
+		if (in_array($method_name, $protected_methods))
+		{
+			// does the api key exist?
+			$exists = Auth::api_key_check($api_key);
+			
+			if ($exists === false)
+			{
+				$this->response('Authentication required', 400);
+				exit;
+			}
+		}
+	}
 	
 	/**
 	 * Get information about the API.
@@ -50,6 +72,8 @@ abstract class Nova_api extends Nova_REST_Controller {
 	 */
 	public function info_get()
 	{
+		$this->_setup();
+		
 		$this->load->model('settings_model', 'settings');
 		
 		$output[] = array(
