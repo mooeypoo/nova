@@ -492,6 +492,28 @@ abstract class Nova_users_model extends CI_Model {
 		return false;
 	}
 	
+	/**
+	 * Searches the users table for the passed API key.
+	 *
+	 * @access	public
+	 * @since	2.1
+	 * @param	string	the API key
+	 * @return	bool	is there an API key that matches?
+	 */
+	public function find_api_key($key)
+	{
+		$this->db->from('users');
+		$this->db->where('api_key', $key);
+		$query = $this->db->query();
+		
+		if ($query->num_rows() > 0)
+		{
+			return true;
+		}
+		
+		return false;
+	}
+	
 	public function count_all_users($status = 'active')
 	{
 		$this->db->from('users');
