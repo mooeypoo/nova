@@ -7,11 +7,7 @@
 		
 		<?php echo $_redirect;?>
 		
-		<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0.1/jquery.mobile-1.0.1.min.css" />
-		<script src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
-		<script src="http://code.jquery.com/mobile/1.0.1/jquery.mobile-1.0.1.min.js"></script>
-		
-		<?php echo $javascript;?>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.css">
 	</head>
 	<body>
 		<div data-role="page" data-theme="b">
@@ -47,5 +43,9 @@
 				<?php echo $ajax;?>
 			</div>
 		</div>
+
+		<script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+		<script src="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.js"></script>
+		<?php echo $javascript;?>
 	</body>
 </html>
