@@ -9,11 +9,15 @@
 		
 		$('table.zebra tbody > tr:nth-child(odd)').addClass('alt');
 		
-		$('[rel=tooltip]').tooltip({
+		$('[rel=tooltip]').twipsy({
+			animate: false,
+			offset: 5,
 			placement: 'right'
 		});
 		
 		$('[rel=popover]').popover({
+			animate: false,
+			offset: 5,
 			placement: 'right'
 		});
 		

@@ -35,7 +35,9 @@
 			alert('<?php echo $this->lang->line('alert_sys_email_off');?>');
 		});
 		
-		$('[rel=tooltip]').tooltip({
+		$('[rel=tooltip]').twipsy({
+			animate: false,
+			offset: 5,
 			placement: 'right',
 			html: true
 		});

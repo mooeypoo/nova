@@ -1,6 +1,9 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');?>
 
 <script type="text/javascript" src="<?php echo base_url().MODFOLDER;?>/assets/js/jquery.ajaxq.js"></script>
+<script type="text/javascript" src="<?php echo base_url().MODFOLDER;?>/assets/js/bootstrap-twipsy.js"></script>
+<link rel="stylesheet" href="<?php echo base_url().MODFOLDER;?>/assets/js/css/bootstrap-twipsy.css" />
+
 <script type="text/javascript">
 	$(document).ready(function(){
 		$("#progress").progressbar({ value: 50 });
@@ -19,7 +22,9 @@
 			var send;
 			
 			var twipsyOptions = {
-				placement: 'right'
+				placement: 'right',
+				offset: 5,
+				animate: false
 			}
 			
 			// user defaults
@@ -44,7 +49,7 @@
 						$('table tbody tr:eq(0) td:eq(1) .failure img').attr('title', function(){
 							return data.message
 						});
-						$('.tiptip').tooltip(twipsyOptions);
+						$('.tiptip').twipsy(twipsyOptions);
 					}
 				}
 			});
@@ -71,7 +76,7 @@
 						$('table tbody tr:eq(1) td:eq(1) .failure img').attr('title', function(){
 							return data.message
 						});
-						$('.tiptip').tooltip(twipsyOptions);
+						$('.tiptip').twipsy(twipsyOptions);
 					}
 				}
 			});
@@ -98,7 +103,7 @@
 						$('table tbody tr:eq(2) td:eq(1) .failure img').attr('title', function(){
 							return data.message
 						});
-						$('.tiptip').tooltip(twipsyOptions);
+						$('.tiptip').twipsy(twipsyOptions);
 					}
 					else if (data.code == 2)
 					{
@@ -106,7 +111,7 @@
 						$('table tbody tr:eq(2) td:eq(1) .warning img').attr('title', function(){
 							return data.message
 						});
-						$('.tiptip').tooltip(twipsyOptions);
+						$('.tiptip').twipsy(twipsyOptions);
 					}
 				}
 			});
@@ -133,7 +138,7 @@
 						$('table tbody tr:eq(3) td:eq(1) .failure img').attr('title', function(){
 							return data.message
 						});
-						$('.tiptip').tooltip(twipsyOptions);
+						$('.tiptip').twipsy(twipsyOptions);
 					}
 				}
 			});
@@ -160,7 +165,7 @@
 						$('table tbody tr:eq(4) td:eq(1) .failure img').attr('title', function(){
 							return data.message
 						});
-						$('.tiptip').tooltip(twipsyOptions);
+						$('.tiptip').twipsy(twipsyOptions);
 					}
 				}
 			});
@@ -187,7 +192,7 @@
 						$('table tbody tr:eq(5) td:eq(1) .failure img').attr('title', function(){
 							return data.message
 						});
-						$('.tiptip').tooltip(twipsyOptions);
+						$('.tiptip').twipsy(twipsyOptions);
 					}
 				}
 			});
@@ -214,7 +219,7 @@
 						$('table tbody tr:eq(6) td:eq(1) .failure img').attr('title', function(){
 							return data.message
 						});
-						$('.tiptip').tooltip(twipsyOptions);
+						$('.tiptip').twipsy(twipsyOptions);
 					}
 					else if (data.code == 2)
 					{
@@ -222,7 +227,7 @@
 						$('table tbody tr:eq(6) td:eq(1) .warning img').attr('title', function(){
 							return data.message
 						});
-						$('.tiptip').tooltip(twipsyOptions);
+						$('.tiptip').twipsy(twipsyOptions);
 					}
 				}
 			});

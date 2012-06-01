@@ -93,7 +93,9 @@ if(isset($display))
 			return false;
 		});
 		
-		$('[rel=tooltip]').tooltip({
+		$('[rel=tooltip]').twipsy({
+			animate: false,
+			offset: 5,
 			placement: 'right'
 		});
 		

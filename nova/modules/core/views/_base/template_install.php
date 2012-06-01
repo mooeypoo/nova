@@ -6,24 +6,35 @@
  * @author		Anodyne Productions
  */
 
+// set the final style location
+$style_loc = MODFOLDER.'/core/views/_base/install/css/skin.css';
+
 ?><!DOCTYPE html>
 <html lang="en">
 	<head>
 		<title><?php echo $title;?></title>
 		
-		<meta charset="utf-8">
-		<meta name="description" content="<?php echo $this->config->item('meta_desc');?>">
-		<meta name="keywords" content="<?php echo $this->config->item('meta_keywords');?>">
-		<meta name="author" content="<?php echo $this->config->item('meta_author');?>">
+		<meta charset="utf-8" />
+		<meta name="description" content="<?php echo $this->config->item('meta_desc');?>" />
+		<meta name="keywords" content="<?php echo $this->config->item('meta_keywords');?>" />
+		<meta name="author" content="<?php echo $this->config->item('meta_author');?>" />
 		
 		<?php if (isset($_redirect)): echo $_redirect; endif;?>
 		
-		<link rel="stylesheet" href="<?php echo base_url().MODFOLDER;?>/assets/js/css/bootstrap.min.css">
-		<link rel="stylesheet" href="<?php echo base_url().MODFOLDER;?>/assets/js/css/bootstrap-responsive.min.css">
-		<link rel="stylesheet" href="<?php echo base_url().MODFOLDER;?>/assets/js/css/jquery.ui.core.css">
-		<link rel="stylesheet" href="<?php echo base_url().MODFOLDER;?>/core/views/_base/install/css/jquery.ui.theme.css">
-		<link rel="stylesheet" href="<?php echo base_url().MODFOLDER;?>/assets/js/css/jquery.ui.progressbar.css">
-		<link rel="stylesheet" href="<?php echo base_url().MODFOLDER;?>/core/views/_base/install/css/skin.css">
+		<style type="text/css">
+			@import url("<?php echo base_url().MODFOLDER.'/core/views/_base/install/css/jquery.ui.core.css';?>");
+			@import url("<?php echo base_url().MODFOLDER.'/core/views/_base/install/css/jquery.ui.theme.css';?>");
+			@import url("<?php echo base_url().MODFOLDER.'/assets/js/css/jquery.ui.progressbar.css';?>");
+		</style>
+		
+		<!-- STYLESHEETS -->
+		<?php echo link_tag($style_loc); ?>
+		
+		<script type="text/javascript" src="<?php echo base_url().MODFOLDER.'/assets/js/jquery.js';?>"></script>
+		<script type="text/javascript" src="<?php echo base_url().MODFOLDER.'/assets/js/jquery.ui.core.min.js';?>"></script>
+		<script type="text/javascript" src="<?php echo base_url().MODFOLDER.'/assets/js/jquery.ui.widget.min.js';?>"></script>
+		<script type="text/javascript" src="<?php echo base_url().MODFOLDER.'/assets/js/jquery.ui.progressbar.min.js';?>"></script>
+		<?php echo $javascript;?>
 	</head>
 	<body>
 		<div id="header"></div>
@@ -66,12 +77,5 @@
 				Powered by <strong><?php echo APP_NAME;?></strong>
 			</div>
 		</div>
-
-		<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
-		<script type="text/javascript" src="<?php echo base_url().MODFOLDER;?>/assets/js/bootstrap.min.js"></script>
-		<script type="text/javascript" src="<?php echo base_url().MODFOLDER;?>/assets/js/jquery.ui.core.min.js"></script>
-		<script type="text/javascript" src="<?php echo base_url().MODFOLDER;?>/assets/js/jquery.ui.widget.min.js"></script>
-		<script type="text/javascript" src="<?php echo base_url().MODFOLDER;?>/assets/js/jquery.ui.progressbar.min.js"></script>
-		<?php echo $javascript;?>
 	</body>
 </html>

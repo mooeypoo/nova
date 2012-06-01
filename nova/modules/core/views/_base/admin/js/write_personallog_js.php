@@ -17,7 +17,9 @@
 			$('.chosen').chosen();
 		}
 
-		$('[rel=tooltip]').tooltip({
+		$('[rel=tooltip]').twipsy({
+			animate: false,
+			offset: 5,
 			placement: 'right'
 		});
 			

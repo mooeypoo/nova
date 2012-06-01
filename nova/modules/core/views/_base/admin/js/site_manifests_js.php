@@ -37,7 +37,10 @@
 			}
 		});
 		
-		$('[rel=tooltip]').tooltip();
+		$('[rel=tooltip]').twipsy({
+			animate: false,
+			offset: 5
+		});
 		
 		$("a[rel=facebox]").click(function() {
 			var action = $(this).attr('myAction');
