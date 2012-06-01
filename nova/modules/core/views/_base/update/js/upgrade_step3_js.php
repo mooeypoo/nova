@@ -1,9 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');?>
 
 <script type="text/javascript" src="<?php echo base_url().MODFOLDER;?>/assets/js/jquery.ajaxq.js"></script>
-<script type="text/javascript" src="<?php echo base_url().MODFOLDER;?>/assets/js/bootstrap-twipsy.js"></script>
-<link rel="stylesheet" href="<?php echo base_url().MODFOLDER;?>/assets/js/css/bootstrap.css" />
-
 <script type="text/javascript">
 	$(document).ready(function(){
 		$("#progress").progressbar({ value: 75 });
@@ -20,9 +17,7 @@
 			var send;
 			
 			var twipsyOptions = {
-				placement: 'right',
-				offset: 5,
-				animate: false
+				placement: 'right'
 			}
 			
 			// get the password
@@ -50,7 +45,7 @@
 						$('.failure-password img').attr('title', function(){
 							return data.message
 						});
-						$('.tiptip').twipsy(twipsyOptions);
+						$('.tiptip').tooltip(twipsyOptions);
 					}
 				}
 			});
@@ -80,7 +75,7 @@
 						$('.failure-admin img').attr('title', function(){
 							return data.message
 						});
-						$('.tiptip').twipsy(twipsyOptions);
+						$('.tiptip').tooltip(twipsyOptions);
 					}
 				}
 			});

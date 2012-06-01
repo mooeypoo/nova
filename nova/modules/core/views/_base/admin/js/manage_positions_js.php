@@ -40,16 +40,11 @@
 			return false;
 		});
 		
-		$('[rel=twipsy]').twipsy({
-			animate: false,
-			offset: 2
-		});
+		$('[rel=twipsy]').tooltip();
 		
 		$('[rel=popover]').popover({
 			trigger: 'manual',
-			animate: false,
 			placement: 'left',
-			offset: 5,
 			html: true
 		}).click(function(e){
 			

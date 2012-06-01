@@ -2,8 +2,6 @@
 
 <?php $string = random_string('alnum', 8);?>
 
-<link rel="stylesheet" href="<?php echo base_url().MODFOLDER;?>/assets/js/css/bootstrap.css" />
-
 <script type="text/javascript">
 	function checkLock() {
 		var send = {
@@ -50,9 +48,7 @@
 			return false;
 		});
 
-		$('[rel=tooltip]').twipsy({
-			animate: false,
-			offset: 5,
+		$('[rel=tooltip]').tooltip({
 			placement: 'right'
 		});
 		

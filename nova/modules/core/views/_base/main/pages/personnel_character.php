@@ -13,8 +13,6 @@
 	}
 </style>
 
-<link rel="stylesheet" href="<?php echo base_url().MODFOLDER;?>/assets/js/css/bootstrap.css">
-
 <div class="row">
 	<?php if (isset($character)): ?>
 		<div class="span4">

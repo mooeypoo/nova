@@ -87,9 +87,7 @@
 			return false;
 		});
 		
-		$('[rel=tooltip]').twipsy({
-			animate: false,
-			offset: 5,
+		$('[rel=tooltip]').tooltip({
 			placement: 'right'
 		});
 	});

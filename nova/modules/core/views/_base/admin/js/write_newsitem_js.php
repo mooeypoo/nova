@@ -10,9 +10,7 @@
 			return confirm('<?php echo lang('confirm_post_newsitem');?>');
 		});
 
-		$('[rel=tooltip]').twipsy({
-			animate: false,
-			offset: 5,
+		$('[rel=tooltip]').tooltip({
 			placement: 'right'
 		});
 	});

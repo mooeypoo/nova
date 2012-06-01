@@ -5,7 +5,7 @@
  * @package		Nova
  * @category	Assets
  * @author		Anodyne Productions
- * @copyright	2011 Anodyne Productions
+ * @copyright	2012 Anodyne Productions
  */
 
 $faceboxcss = ( ! is_file(APPPATH.'views/'.$current_skin.'/admin/css/jquery.facebox.css'))
@@ -20,19 +20,20 @@ $chosencss = ( ! is_file(APPPATH .'views/'.$current_skin.'/admin/css/jquery.chos
 	? base_url().MODFOLDER.'/assets/js/css/jquery.chosen.css'
 	: base_url().APPFOLDER.'/views/'.$current_skin.'/admin/css/jquery.chosen.css';
 
-?><style type="text/css">
-			@import url('<?php echo base_url().MODFOLDER;?>/assets/js/css/jquery.ui.core.css');
-			@import url('<?php echo $faceboxcss;?>');
-			@import url('<?php echo $uiTheme;?>');
-			@import url('<?php echo base_url().MODFOLDER;?>/assets/js/css/jquery.chosen.structure.css');
-		</style>
+?><link rel="stylesheet" href="<?php echo base_url().MODFOLDER;?>/assets/js/css/bootstrap.min.css">
+		<link rel="stylesheet" href="<?php echo base_url().MODFOLDER;?>/assets/js/css/bootstrap-responsive.min.css">
+		<link rel="stylesheet" href="<?php echo base_url().MODFOLDER;?>/assets/js/css/jquery.ui.core.css">
+		<link rel="stylesheet" href="<?php echo $faceboxcss;?>">
+		<link rel="stylesheet" href="<?php echo $uiTheme;?>">
+		<link rel="stylesheet" href="<?php echo base_url().MODFOLDER;?>/assets/js/css/jquery.chosen.structure.css">
 		
 		<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
-		<script type="text/javascript" src="<?php echo base_url().MODFOLDER.'/assets/js/jquery.lazy.js';?>"></script>
-		<script type="text/javascript" src="<?php echo base_url().MODFOLDER.'/assets/js/jquery.ui.core.min.js';?>"></script>
-		<script type="text/javascript" src="<?php echo base_url().MODFOLDER.'/assets/js/jquery.ui.widget.min.js';?>"></script>
-		<script type="text/javascript" src="<?php echo base_url().MODFOLDER.'/assets/js/reflection.js';?>"></script>
-		<script type="text/javascript" src="<?php echo base_url().MODFOLDER.'/assets/js/jquery.facebox.js';?>"></script>
+		<script type="text/javascript" src="<?php echo base_url().MODFOLDER;?>/assets/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="<?php echo base_url().MODFOLDER;?>/assets/js/jquery.lazy.js"></script>
+		<script type="text/javascript" src="<?php echo base_url().MODFOLDER;?>/assets/js/jquery.ui.core.min.js"></script>
+		<script type="text/javascript" src="<?php echo base_url().MODFOLDER;?>/assets/js/jquery.ui.widget.min.js"></script>
+		<script type="text/javascript" src="<?php echo base_url().MODFOLDER;?>/assets/js/reflection.js"></script>
+		<script type="text/javascript" src="<?php echo base_url().MODFOLDER;?>/assets/js/jquery.facebox.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function(){
 				$.lazy({					
@@ -87,25 +88,6 @@ $chosencss = ( ! is_file(APPPATH .'views/'.$current_skin.'/admin/css/jquery.chos
 					cache: true
 				});
 				
-				$.lazy({
-					src: '<?php echo base_url() . MODFOLDER;?>/assets/js/bootstrap-twipsy.js',
-					name: 'twipsy',
-					dependencies: {
-						css: ['<?php echo base_url() . MODFOLDER;?>/assets/js/css/bootstrap.css']
-					},
-					cache: true
-				});
-				
-				$.lazy({
-					src: '<?php echo base_url() . MODFOLDER;?>/assets/js/bootstrap-popover.js',
-					name: 'popover',
-					dependencies: {
-						js: ['<?php echo base_url() . MODFOLDER;?>/assets/js/bootstrap-twipsy.js'],
-						css: ['<?php echo base_url() . MODFOLDER;?>/assets/js/css/bootstrap.css']
-					},
-					cache: true
-				});
-				
 				$('a#userpanel').toggle(function(){
 					$('div.panel-body').slideDown('normal', function(){
 						$('.panel-trigger div.ui-icon').removeClass('ui-icon-triangle-1-s');
@@ -125,4 +107,3 @@ $chosencss = ( ! is_file(APPPATH .'views/'.$current_skin.'/admin/css/jquery.chos
 				$('.reflect').reflect({ opacity: '0.3' });
 			});
 		</script>
-		
