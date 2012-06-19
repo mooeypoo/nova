@@ -1,6 +1,10 @@
 # Changelog
 
-## 2.1.0 (06 June 2012)
+## 2.2.0
+
+* If a user goes to a Nova site on their mobile phone, Nova will automatically push them over to a mobile skin for certain pages. This has been designed for players of the game at this time and will not impact the way the site looks to visitors. In the future, we may expand this functionality to other pages.
+
+## 2.1.0 (21 June 2012)
 
 * Users are now notified when mission notes have been updated in the last 72 hours by the notes box auto-expanding when they arrive at the posting page.
 * Users are now shown when the last update to the mission notes was all the time.
@@ -24,6 +28,7 @@
 * Accepting or rejecting docking applications would throw a fatal error because the Messages model wasn't loaded before it was used.
 * Join timespan always showed as a user joining "1 Second ago" no matter when they joined.
 * Nova's `timespan_short` helper was missing the word "ago" when the time was less than an hour.
+* The Site Messages page didn't strip HTML tags from the content potentially allowing unclosed HTML tags to wreak havoc on the page.
 
 ## 2.0.3 (01 March 2012)
 
